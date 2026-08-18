@@ -133,11 +133,29 @@ git commit -m "chore: scaffold Astro project with React integration"
 - Consumes: Task 1's project
 - Produces: `Base.astro` accepting props `{ title: string; description: string; page?: 'home' | 'cv' | 'work' }`
 
-- [ ] **Step 1: Download and self-host the fonts**
+- [ ] **Step 1: Configure fonts via Astro's built-in Fonts API**
 
-Fetch the WOFF2 files for IBM Plex Sans (400, 500, 600), IBM Plex Mono (400, 500) and Source Serif 4 (400, 600, 700 — variable is fine) into `public/fonts/`. Both families are OFL-licensed; include the licence text at `public/fonts/OFL.txt`.
+Astro 7 ships a stable Fonts API that downloads, subsets, self-hosts and preloads fonts at build time. Use it rather than committing font binaries — it satisfies the spec's self-hosting requirement (files are served from our own origin, no request to a third-party CDN) with no manual asset management.
 
-Do **not** link to fonts.googleapis.com. The spec requires self-hosting so the CSP stays strict and there is no layout shift.
+In `astro.config.mjs`:
+
+```js
+import { defineConfig, fontProviders } from 'astro/config';
+import react from '@astrojs/react';
+
+export default defineConfig({
+  integrations: [react()],
+  fonts: [
+    { provider: fontProviders.fontsource(), name: 'Source Serif 4', cssVariable: '--font-serif', weights: [400, 600, 700] },
+    { provider: fontProviders.fontsource(), name: 'IBM Plex Sans', cssVariable: '--font-sans', weights: [400, 500, 600] },
+    { provider: fontProviders.fontsource(), name: 'IBM Plex Mono', cssVariable: '--font-mono', weights: [400, 500] },
+  ],
+});
+```
+
+Then in `Base.astro`'s `<head>`, render each: `<Font cssVariable="--font-serif" preload />` (importing `Font` from `astro:assets`).
+
+If the API's option names differ in the installed version, check `node_modules/astro` types or the docs at https://docs.astro.build/en/guides/fonts/ — do not guess, and do not silently fall back to a Google Fonts `<link>`, which the CSP forbids.
 
 - [ ] **Step 2: Write the tokens**
 
@@ -155,9 +173,9 @@ Create `src/styles/tokens.css`. Light is the base; dark is redefined twice so th
   --accent-2: #2E6F80;
   --alert: #A4442F;
 
-  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
-  --sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --serif: var(--font-serif), Georgia, "Times New Roman", serif;
+  --sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -211,10 +229,34 @@ body {
   gap: 2.1rem;
 }
 
+/* The marginal gutter grid — see docs/design-direction.md. The gutter carries
+   mono section markers, dates and sigla; the main column carries content. */
+.band {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: 0 1.6rem;
+  align-items: start;
+}
+
+.band > .gutter {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding-top: 0.25em;
+}
+
+@media (max-width: 48rem) {
+  .band { grid-template-columns: minmax(0, 1fr); gap: 0.4rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
 ```
+
+Read `docs/design-direction.md` before writing this file. It defines the gutter grid, the trace-strip signature and the method apparatus that Tasks 5 and 6 build on.
 
 - [ ] **Step 4: Write the layout**
 
