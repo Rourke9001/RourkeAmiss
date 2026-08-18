@@ -1,0 +1,203 @@
+---
+// The trace strip row — see "Signature: the trace strip" in
+// docs/design-direction.md. Every bar is normalised to its own baseline: full
+// width is `from`, the filled portion is `to` as a fraction of `from`
+// (barFraction), so bars of different units still read against each other on
+// one axis — shorter is more debt repaid.
+import type { Metric } from '../content/cv/types';
+import { barFraction, formatFigure, formatDelta } from '../lib/metrics';
+import { Provenance } from './Provenance';
+
+interface Props {
+  metric: Metric;
+}
+
+const { metric } = Astro.props;
+
+const fraction = barFraction(metric.from, metric.to);
+const fillPercent = fraction * 100;
+const fromFigure = formatFigure(metric.from, metric.unit);
+const toFigure = formatFigure(metric.to, metric.unit);
+const delta = formatDelta(metric.from, metric.to);
+// Colour is never the only carrier of meaning: the arrow direction and the
+// sign already baked into `delta` both encode up-is-good vs down-is-good.
+const arrow = metric.direction === 'up-is-good' ? '↑' : '↓';
+---
+
+<div class="metric" data-metric={metric.label} data-direction={metric.direction}>
+  <div class="metric-label">{metric.label}</div>
+  <div class="metric-track" data-metric-track>
+    <div class="metric-fill" data-metric-fill style={`width: ${fillPercent}%`}></div>
+  </div>
+  <div class="metric-figures">
+    <span class="figure">{fromFigure}</span>
+    <span class="arrow" aria-hidden="true">{arrow}</span>
+    <span class="figure">{toFigure}</span>
+    <span class="delta">{delta}</span>
+  </div>
+  {metric.verifiedBy && <Provenance client:visible text={metric.verifiedBy} label={metric.label} />}
+</div>
+
+<style>
+  .metric {
+    display: grid;
+    grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.3rem 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+
+  .metric-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .metric-track {
+    position: relative;
+    height: 0.55rem;
+    background: var(--rule-soft);
+    border: 1px solid var(--rule);
+    overflow: hidden;
+  }
+
+  .metric-fill {
+    position: absolute;
+    inset: 0;
+    transform-origin: left;
+    transform: scaleX(1);
+    transition: transform 0.6s ease-out;
+  }
+
+  .metric[data-direction='up-is-good'] .metric-fill {
+    background: var(--accent);
+  }
+
+  .metric[data-direction='down-is-good'] .metric-fill {
+    background: var(--ink-3);
+  }
+
+  .metric-figures {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4em;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    color: var(--ink-2);
+  }
+
+  .metric-figures .figure {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .metric-figures .arrow {
+    color: var(--ink-3);
+  }
+
+  .metric-figures .delta {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  @media (max-width: 30rem) {
+    .metric {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 0.4rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .metric-fill {
+      transition: none !important;
+      transform: scaleX(1) !important;
+    }
+  }
+
+  @media print {
+    .metric-track {
+      display: none;
+    }
+  }
+
+  /* The method apparatus: styling for the Provenance island, expressed here
+     because Astro's scoped styles can't reach into a child React island's
+     rendered markup. This is the apparatus described in
+     docs/design-direction.md — small, mono, indented, marked with a siglum —
+     applied as presentation over the Provenance component's fixed contract,
+     not a second mechanism. */
+  :global(.provenance) {
+    grid-column: 1 / -1;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--ink-3);
+  }
+
+  :global(.provenance button) {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  :global(.provenance button:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  :global(.provenance p) {
+    margin: 0.3rem 0 0 1.4rem;
+    padding-left: 0.6rem;
+    border-left: 1px solid var(--rule);
+  }
+
+  :global(.provenance p::before) {
+    content: '\2020  ';
+    color: var(--ink-3);
+  }
+
+  @media print {
+    :global(.provenance button) {
+      display: none;
+    }
+
+    :global(.provenance p) {
+      display: block !important;
+    }
+  }
+</style>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fills = document.querySelectorAll<HTMLElement>('[data-metric-fill]');
+
+  if (!reduceMotion && fills.length) {
+    fills.forEach((fill) => {
+      fill.style.transform = 'scaleX(0)';
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((entry) => entry.isIntersecting);
+        visible.forEach((entry, index) => {
+          const fill = entry.target.querySelector<HTMLElement>('[data-metric-fill]');
+          if (!fill) return;
+          fill.style.transitionDelay = `${index * 60}ms`;
+          fill.style.transform = 'scaleX(1)';
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.4 },
+    );
+
+    document.querySelectorAll('[data-metric]').forEach((el) => observer.observe(el));
+  }
+</script>
