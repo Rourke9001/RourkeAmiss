@@ -26,6 +26,11 @@ describe('barFraction', () => {
   it('clamps growth to one', () => {
     expect(barFraction(57, 328)).toBe(1);
   });
+  it('returns zero when the baseline is zero or negative', () => {
+    expect(barFraction(0, 5)).toBe(0);
+    expect(barFraction(0, 0)).toBe(0);
+    expect(barFraction(-10, 5)).toBe(0);
+  });
 });
 
 describe('formatFigure', () => {
