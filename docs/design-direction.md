@@ -91,13 +91,21 @@ metrics empty toward the right in `--ink-3`. One glance distinguishes them.
 ## Second device: the method apparatus
 
 Every figure is accountable, and that accountability is **typographic, not a UI
-affordance**. Figures carry a superscript siglum — `a`, `b`, `c` — in mono. The
-method notes collect in a small apparatus block at the foot of the section:
+affordance**. Each method note sits directly beneath the row whose figure it
+explains, set small and in mono, marked with a dagger:
 
 ```
-   ᵃ Type-check traces captured before and after, same machine, cold cache.
-   ᵇ Full compiler error survey, re-audited three weeks after completion.
+  COLD TYPE-CHECK    ████████░░░░░░░░░░░░░░  177s → 36.6s   −79%
+       † Type-check traces captured before and after, same machine, cold cache.
 ```
+
+**Amended after implementation.** This originally specified lettered sigla
+(`a`, `b`, `c`) with the notes collected in an apparatus block at the foot of
+each section. That was dropped: a siglum exists to link a figure to a note that
+sits somewhere else, and once each note is attached to its own row there is no
+separation left to disambiguate. Letters would have been decoration imitating
+scholarly apparatus rather than doing its work. The dagger is a marker, not a
+reference, and that is the honest form for this arrangement.
 
 This is the apparatus of a critical edition, and it is doing real work: it dramatises
 "I measure the debt and prove the result held" without a single sentence claiming it.
