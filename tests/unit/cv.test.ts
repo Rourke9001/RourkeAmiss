@@ -14,7 +14,7 @@ describe('cv data', () => {
   });
 
   it('never contains the phone number', () => {
-    expect(JSON.stringify(cv)).not.toMatch(/82\s*000\s*0000/);
+    expect(JSON.stringify(cv)).not.toMatch(/(?:\+?27|0)[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{4}\b/);
   });
 
   it('leads with at least three headline metrics', () => {

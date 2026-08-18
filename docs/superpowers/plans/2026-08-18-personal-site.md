@@ -17,7 +17,7 @@
 - **No CV file may enter the repository.** `.gitignore` blocks `*.pdf`, `*.docx`, `*.doc`. Never add an exception.
 - **Never publish:** ticket identifiers, employer file paths, employer store/module/repository names, customer references (network or substation identifiers, client names). This applies to site content, MDX bodies, code comments, and commit messages.
 - **The word "Senior" appears nowhere** on the site or in the generated README.
-- **The phone number `+27 82 000 0000` appears nowhere** in this repository or the built output.
+- **No phone number appears anywhere** in this repository or the built output. The user's mobile belongs in the CV they email, not on a public page or in a public repo. Guards match the South African mobile *shape*, never a literal number — writing the number into a check would defeat the check.
 - **The Agnify 67% figure never gets a `verifiedBy` value.** It is carried over from the previous CV and was not independently verified.
 - **Header facts, verbatim:** `Johannesburg, South Africa` · `Portuguese citizen · EU work authorisation` · `rourke9001@gmail.com` · `github.com/Rourke9001` · `linkedin.com/in/rourke-silva-amiss-73b983a7`
 - **Design tokens** are those in spec §5 and are not invented per component.
@@ -354,7 +354,7 @@ describe('cv data', () => {
   });
 
   it('never contains the phone number', () => {
-    expect(JSON.stringify(cv)).not.toMatch(/82\s*000\s*0000/);
+    expect(JSON.stringify(cv)).not.toMatch(/(?:\+?27|0)[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{4}\b/);
   });
 
   it('leads with at least three headline metrics', () => {
@@ -887,7 +887,7 @@ import { join } from 'node:path';
 const DIR = 'src/content/work';
 const FORBIDDEN = [
   { name: 'ticket identifier', re: /\b[A-Z]{2,10}-\d{3,6}\b/ },
-  { name: 'phone number', re: /82\s*000\s*0000/ },
+  { name: 'phone number', re: /(?:\+?27|0)[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{4}\b/ },
   { name: 'the word Senior', re: /\bsenior\b/i },
 ];
 
@@ -1400,9 +1400,10 @@ describe('scanText', () => {
   it('catches a ticket identifier', () => {
     expect(scanText('fixed in ABCD-1234 last week', 'a.html')).toHaveLength(1);
   });
-  it('catches the phone number in any spacing', () => {
+  it('catches a South African mobile number in any spacing', () => {
     expect(scanText('call +27 82 000 0000', 'a.html')).toHaveLength(1);
     expect(scanText('call +27820000000', 'a.html')).toHaveLength(1);
+    expect(scanText('call 082 000 0000', 'a.html')).toHaveLength(1);
   });
   it('catches the word Senior', () => {
     expect(scanText('Senior Software Engineer', 'a.html')).toHaveLength(1);
@@ -1437,7 +1438,7 @@ import { join } from 'node:path';
 
 export const FORBIDDEN = [
   { name: 'ticket identifier', pattern: /\b[A-Z]{2,10}-\d{3,6}\b/g },
-  { name: 'phone number', pattern: /\+?27[\s-]?82[\s-]?000[\s-]?0000|82\s*000\s*0000/g },
+  { name: 'phone number', pattern: /(?:\+?27|0)[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{4}\b/g },
   { name: 'the word Senior', pattern: /\bsenior\b/gi },
   { name: 'source path', pattern: /\b(?:src|apps|libs|packages)\/[\w.-]+\/[\w./-]+\.(?:ts|tsx|js|jsx|java|go|py)\b/g },
 ];
@@ -1544,7 +1545,7 @@ describe('renderReadme', () => {
     expect(md).not.toMatch(/\bsenior\b/i);
   });
   it('never leaks the phone number', () => {
-    expect(md).not.toMatch(/82\s*000\s*0000/);
+    expect(md).not.toMatch(/(?:\+?27|0)[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{4}\b/);
   });
 });
 ```
@@ -1634,7 +1635,7 @@ test('provenance text is present without JavaScript', async ({ browser }) => {
 
 test('the CV page carries no phone number', async ({ page }) => {
   await page.goto('/cv');
-  expect(await page.content()).not.toMatch(/82\s*000\s*0000/);
+  expect(await page.content()).not.toMatch(/(?:\+?27|0)[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{4}\b/);
 });
 
 test('the CV page prints without interactive chrome', async ({ page }) => {
