@@ -1,0 +1,29 @@
+import { describe, it, expect } from 'vitest';
+import { cv } from '../../src/content/cv/cv';
+
+describe('cv data', () => {
+  it('carries the agreed header facts', () => {
+    expect(cv.name).toBe('Rourke Amiss');
+    expect(cv.location).toBe('Johannesburg, South Africa');
+    expect(cv.email).toBe('rourke9001@gmail.com');
+    expect(cv.linkedin).toBe('https://www.linkedin.com/in/rourke-silva-amiss-73b983a7/');
+  });
+
+  it('never uses the word Senior', () => {
+    expect(JSON.stringify(cv)).not.toMatch(/senior/i);
+  });
+
+  it('never contains the phone number', () => {
+    expect(JSON.stringify(cv)).not.toMatch(/82\s*000\s*0000/);
+  });
+
+  it('leads with at least three headline metrics', () => {
+    expect(cv.headlineMetrics.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('gives every headline metric a distinct from and to', () => {
+    for (const m of cv.headlineMetrics) {
+      expect(m.from).not.toBe(m.to);
+    }
+  });
+});
