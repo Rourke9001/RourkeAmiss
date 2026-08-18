@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { cv } from '../../src/content/cv/cv';
+import { formatDelta } from '../../src/lib/metrics';
 
 describe('cv data', () => {
   it('carries the agreed header facts', () => {
@@ -24,6 +25,12 @@ describe('cv data', () => {
   it('gives every headline metric a distinct from and to', () => {
     for (const m of cv.headlineMetrics) {
       expect(m.from).not.toBe(m.to);
+    }
+  });
+
+  it('states a delta that matches its own from and to', () => {
+    for (const m of cv.headlineMetrics) {
+      expect(m.delta).toBe(formatDelta(m.from, m.to));
     }
   });
 });
