@@ -399,6 +399,7 @@ Tracked so they are not lost, explicitly not built here:
 - Align LinkedIn titles and dates with the CV.
 - Pin AmissProj on the GitHub profile; confirm the BAC repositories are
   deliberately public or private.
-- Configure rourkeamiss.co.za. Note: Static Web Apps apex domains need an
-  ALIAS/ANAME record or Azure DNS; confirm the `.co.za` registrar supports this
-  before committing to an apex-first setup.
+- Configure rourkeamiss.co.za at deploy time. Both apex and `www` are planned;
+  the registrar has been used before and supports the ALIAS/ANAME record that
+  Static Web Apps requires for an apex domain. Two custom domains is exactly the
+  Free plan limit, so this fits with nothing to spare.
