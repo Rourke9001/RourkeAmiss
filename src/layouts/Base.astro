@@ -2,6 +2,7 @@
 import { Font } from 'astro:assets';
 import '../styles/tokens.css';
 import '../styles/base.css';
+import { cv } from '../content/cv/cv';
 
 interface Props {
   title: string;
@@ -10,6 +11,27 @@ interface Props {
 }
 
 const { title, description, page = 'home' } = Astro.props;
+
+// The target domain from docs/superpowers/specs/2026-08-18-personal-site-design.md
+// (configured last, at deploy time). Not part of the Cv shape, so it lives
+// here as a constant rather than being invented as a fake cv.ts field.
+const siteUrl = 'https://rourkeamiss.co.za';
+
+// JSON-LD Person schema, built FROM cv.ts so it cannot drift from the page —
+// see "Single source of truth" in the design spec. No phone number.
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: cv.name,
+  jobTitle: cv.positionLine,
+  email: `mailto:${cv.email}`,
+  url: siteUrl,
+  sameAs: [cv.github, cv.linkedin],
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Johannesburg',
+  },
+};
 ---
 <!doctype html>
 <html lang="en-ZA">
@@ -21,6 +43,7 @@ const { title, description, page = 'home' } = Astro.props;
     <Font cssVariable="--font-sans" preload={[{ weight: 400, style: 'normal' }]} />
     <Font cssVariable="--font-serif" />
     <Font cssVariable="--font-mono" />
+    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
   </head>
   <body>
     <div class="sheet">

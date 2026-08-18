@@ -1,0 +1,72 @@
+---
+// The masthead: name, position line, contact row. Sits above the marginal
+// gutter grid (docs/design-direction.md) — it is not itself a "section" with
+// a mono gutter marker, it's the header the whole page hangs off.
+import type { Cv } from '../content/cv/types';
+
+interface Props {
+  cv: Cv;
+}
+
+const { cv } = Astro.props;
+---
+
+<header class="masthead">
+  <h1>{cv.name}</h1>
+  <p class="position">{cv.positionLine}</p>
+  <p class="contact">
+    <span>{cv.location}</span>
+    <span class="sep" aria-hidden="true">·</span>
+    <span>{cv.citizenship}</span>
+    <span class="sep" aria-hidden="true">·</span>
+    <a href={`mailto:${cv.email}`}>{cv.email}</a>
+    <span class="sep" aria-hidden="true">·</span>
+    <a href={cv.github} rel="noopener noreferrer" target="_blank">GitHub</a>
+    <span class="sep" aria-hidden="true">·</span>
+    <a href={cv.linkedin} rel="noopener noreferrer" target="_blank">LinkedIn</a>
+  </p>
+</header>
+
+<style>
+  .masthead {
+    display: flex;
+    flex-direction: column;
+  }
+
+  h1 {
+    margin: 0;
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(2.1rem, 1.6rem + 2vw, 2.75rem);
+    line-height: 1.1;
+    color: var(--ink);
+  }
+
+  .position {
+    margin: 0.5rem 0 0;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    font-size: 0.85rem;
+    color: var(--accent);
+  }
+
+  .contact {
+    margin: 1rem 0 0;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4em;
+    font-size: 0.85rem;
+    color: var(--ink-2);
+  }
+
+  .contact a {
+    color: var(--ink-2);
+  }
+
+  .sep {
+    color: var(--ink-3);
+  }
+</style>
