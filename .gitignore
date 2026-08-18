@@ -1,0 +1,26 @@
+# Never commit the CV or any document export
+*.pdf
+*.docx
+*.doc
+
+# Dependencies and build output
+node_modules/
+dist/
+.astro/
+
+# Local env and secrets
+.env
+.env.*
+!.env.example
+local.settings.json
+
+# Test artefacts
+playwright-report/
+test-results/
+coverage/
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
