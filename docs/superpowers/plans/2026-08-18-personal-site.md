@@ -420,7 +420,7 @@ git commit -m "feat: add typed CV content model as the single source of truth"
 - Test: `tests/unit/metrics.test.ts`
 
 **Interfaces:**
-- Consumes: `Metric` from `src/content/cv/types.ts`
+- Consumes: nothing. These are pure numeric functions and deliberately import no types, which keeps them trivially testable.
 - Produces:
   - `percentChange(from: number, to: number): number` — signed, rounded to nearest integer
   - `barFraction(from: number, to: number): number` — `to/from` clamped to `0..1`
@@ -570,8 +570,10 @@ git commit -m "feat: add delta arithmetic with data consistency guard"
 - [ ] **Step 1: Install React testing dependencies**
 
 ```bash
-npm install -D @testing-library/react @testing-library/dom jsdom
+npm install -D @testing-library/react @testing-library/dom jsdom @vitejs/plugin-react
 ```
+
+`@vitejs/plugin-react` is required by `vitest.config.ts` below. Astro's React integration may already pull it in transitively, but depend on it explicitly rather than relying on hoisting.
 
 Add to `astro.config.mjs` nothing; create `vitest.config.ts`:
 
@@ -659,6 +661,8 @@ Expected: PASS, 3 tests.
 - [ ] **Step 6: Build the ledger row**
 
 Create `src/components/Metric.astro` rendering one row: label in mono uppercase, `from` figure, a hairline bar whose filled width is `barFraction(from, to) * 100%`, the `to` figure, and the delta. All figures use `font-variant-numeric: tabular-nums` and `font-family: var(--mono)`. Render `<Provenance client:visible />` only when `metric.verifiedBy` is set.
+
+The root element of the row **must carry a `data-metric` attribute** whose value is the metric's `label`. Task 14's end-to-end tests select on it, and it is the stable hook for any later instrumentation.
 
 The bar animates its width once via a CSS transition triggered by an `IntersectionObserver`; guard with `prefers-reduced-motion`.
 
