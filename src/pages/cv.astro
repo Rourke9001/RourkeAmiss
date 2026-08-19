@@ -1,0 +1,157 @@
+---
+// The full CV, print-tuned. Spec §"Ships in v1": "Full CV, print-tuned —
+// everything except the phone number."
+//
+// Deliberately NOT the landing page's marginal-gutter grid: this route exists
+// to be read straight through and parsed by software, so it is a single left
+// aligned column in the standard section order a CV parser expects — Profile,
+// Experience, Projects, Skills, Education & Certification — with no table used
+// for layout anywhere.
+//
+// The trace strip does not appear here. Its figures are all present in the
+// Utilifeed bullets as prose; the strip is a landing-page device for a reader
+// with twenty seconds, not CV content.
+import Base from '../layouts/Base.astro';
+import Masthead from '../components/Masthead.astro';
+import Entry from '../components/Entry.astro';
+import { cv } from '../content/cv/cv';
+import '../styles/print.css';
+---
+<Base title={`${cv.name} — CV`} description={cv.profile} page="cv">
+  <nav class="back">
+    <a href="/">← Back to the site</a>
+  </nav>
+
+  <Masthead cv={cv} />
+
+  <section class="cv-section" aria-labelledby="cv-profile">
+    <h2 id="cv-profile">Profile</h2>
+    <p class="profile">{cv.profile}</p>
+  </section>
+
+  <section class="cv-section" aria-labelledby="cv-experience">
+    <h2 id="cv-experience">Experience</h2>
+    {cv.roles.map((role) => (
+      <Entry
+        title={role.org}
+        subtitle={role.title}
+        period={role.period}
+        context={role.context}
+        bullets={role.bullets}
+      />
+    ))}
+  </section>
+
+  <section class="cv-section" aria-labelledby="cv-projects">
+    <h2 id="cv-projects">Projects</h2>
+    {cv.projects.map((project) => (
+      <Entry
+        title={project.name}
+        period={project.period}
+        context={project.context}
+        bullets={project.bullets}
+        links={project.links}
+      />
+    ))}
+  </section>
+
+  <section class="cv-section" aria-labelledby="cv-skills">
+    <h2 id="cv-skills">Skills</h2>
+    {/* A definition list, not a table: the relation really is term-to-values,
+        and a parser reading a table would have to guess which axis is which. */}
+    <dl class="skills">
+      {cv.skills.map((group) => (
+        <div class="skill-group">
+          <dt>{group.label}</dt>
+          <dd>{group.items.join(', ')}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <section class="cv-section" aria-labelledby="cv-education">
+    <h2 id="cv-education">Education &amp; Certification</h2>
+    <ul class="credentials">
+      {cv.credentials.map((credential) => (
+        <li>
+          <span class="credential-what">{credential.what}</span>
+          {credential.who && <span class="credential-who"> — {credential.who}</span>}
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <style>
+    .back {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+    }
+
+    .back a {
+      color: var(--ink-3);
+      text-decoration: none;
+    }
+
+    .back a:hover {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 0.2em;
+    }
+
+    /* The section marker keeps the landing page's vocabulary — mono, uppercase,
+       tracked — but sits above its section rather than in a gutter, since this
+       page has no gutter to put it in. */
+    .cv-section > h2 {
+      margin: 0 0 0.9rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--rule);
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+    }
+
+    .profile {
+      margin: 0;
+      color: var(--ink-2);
+    }
+
+    .skills {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .skill-group dt {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+
+    .skill-group dd {
+      margin: 0.15rem 0 0;
+      color: var(--ink-2);
+    }
+
+    .credentials {
+      margin: 0;
+      padding-left: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .credential-what {
+      color: var(--ink);
+    }
+
+    .credential-who {
+      color: var(--ink-3);
+    }
+  </style>
+</Base>
