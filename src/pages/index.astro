@@ -6,6 +6,7 @@
 import Base from '../layouts/Base.astro';
 import Masthead from '../components/Masthead.astro';
 import Metric from '../components/Metric.astro';
+import MetricList from '../components/MetricList.astro';
 import Entry from '../components/Entry.astro';
 import { cv } from '../content/cv/cv';
 ---
@@ -14,9 +15,9 @@ import { cv } from '../content/cv/cv';
 
   <section class="metrics-ledger" aria-labelledby="metrics-heading">
     <h2 id="metrics-heading" class="metrics-heading">Measured</h2>
-    <div class="metrics-list">
+    <MetricList>
       {cv.headlineMetrics.map((metric) => <Metric metric={metric} />)}
-    </div>
+    </MetricList>
   </section>
 
   <section class="band">
@@ -79,11 +80,6 @@ import { cv } from '../content/cv/cv';
       text-transform: uppercase;
       color: var(--ink-3);
       font-weight: 400;
-    }
-
-    .metrics-list {
-      display: flex;
-      flex-direction: column;
     }
 
     .profile {

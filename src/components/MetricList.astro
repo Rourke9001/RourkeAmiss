@@ -1,0 +1,36 @@
+---
+// The trace strip's column frame. docs/design-direction.md's central claim is
+// "the digits must column-align", and that cannot be satisfied by rows that
+// each size their own tracks — the previous arrangement let the "from" figures
+// drift ~40px apart down the page. The tracks are therefore declared once,
+// here, and every <Metric> row is a subgrid of them.
+//
+// Six tracks: label, bar, from, arrow, to, delta. Each figure gets its own
+// track so the digits align as columns, not just as a block.
+---
+
+<div class="metrics-list">
+  <slot />
+</div>
+
+<style>
+  .metrics-list {
+    display: grid;
+    grid-template-columns:
+      minmax(8rem, 12rem) /* label */
+      minmax(0, 1fr) /* bar   */
+      auto /* from  */
+      auto /* arrow */
+      auto /* to    */
+      auto; /* delta */
+    column-gap: 0.45rem;
+  }
+
+  /* Below the collapse point the row stacks; the subgrid follows the single
+     track automatically, so Metric needs no separate breakpoint for columns. */
+  @media (max-width: 30rem) {
+    .metrics-list {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

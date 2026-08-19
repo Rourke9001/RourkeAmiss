@@ -14,17 +14,24 @@ const { cv } = Astro.props;
 <header class="masthead">
   <h1>{cv.name}</h1>
   <p class="position">{cv.positionLine}</p>
-  <p class="contact">
-    <span>{cv.location}</span>
-    <span class="sep" aria-hidden="true">·</span>
-    <span>{cv.citizenship}</span>
-    <span class="sep" aria-hidden="true">·</span>
-    <a href={`mailto:${cv.email}`}>{cv.email}</a>
-    <span class="sep" aria-hidden="true">·</span>
-    <a href={cv.github} rel="noopener noreferrer" target="_blank">GitHub</a>
-    <span class="sep" aria-hidden="true">·</span>
-    <a href={cv.linkedin} rel="noopener noreferrer" target="_blank">LinkedIn</a>
-  </p>
+  {/* Two deliberate rows rather than one wrapping run. The single line runs
+      wider than the 47rem sheet at every viewport, so it always wrapped, and
+      it broke wherever the text happened to run out — stranding "LinkedIn"
+      alone on a line of its own. Splitting identity from contact puts the
+      break where it belongs. The separators are generated on the item that
+      follows them, with no space between, so a "·" can never be left hanging
+      at the end of a line — it always leads the item it introduces. */}
+  <div class="contact">
+    <p class="contact-row">
+      <span>{cv.location}</span>
+      <span>{cv.citizenship}</span>
+    </p>
+    <p class="contact-row">
+      <a href={`mailto:${cv.email}`}>{cv.email}</a>
+      <a href={cv.github} rel="noopener noreferrer" target="_blank">GitHub</a>
+      <a href={cv.linkedin} rel="noopener noreferrer" target="_blank">LinkedIn</a>
+    </p>
+  </div>
 </header>
 
 <style>
@@ -55,18 +62,26 @@ const { cv } = Astro.props;
     margin: 1rem 0 0;
     padding-top: 0.9rem;
     border-top: 1px solid var(--rule);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4em;
     font-size: 0.85rem;
     color: var(--ink-2);
   }
 
-  .contact a {
-    color: var(--ink-2);
+  .contact-row {
+    margin: 0;
   }
 
-  .sep {
+  .contact-row + .contact-row {
+    margin-top: 0.35rem;
+  }
+
+  /* Decorative, and spelled with an empty alt so assistive tech skips it. */
+  .contact-row > * + *::before {
+    content: '·' / '';
     color: var(--ink-3);
+    margin: 0 0.45em;
+  }
+
+  .contact a {
+    color: var(--ink-2);
   }
 </style>

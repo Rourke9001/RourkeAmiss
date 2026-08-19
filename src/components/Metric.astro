@@ -4,6 +4,9 @@
 // width is `from`, the filled portion is `to` as a fraction of `from`
 // (barFraction), so bars of different units still read against each other on
 // one axis — shorter is more debt repaid.
+//
+// The row owns no column tracks of its own: it is a subgrid of <MetricList>,
+// which is what makes the figures column-align across rows.
 import type { Metric } from '../content/cv/types';
 import { barFraction, formatFigure, formatDelta } from '../lib/metrics';
 import { Provenance } from './Provenance';
@@ -29,10 +32,15 @@ const arrow = metric.direction === 'up-is-good' ? '↑' : '↓';
   <div class="metric-track" data-metric-track>
     <div class="metric-fill" data-metric-fill style={`width: ${fillPercent}%`}></div>
   </div>
+  {/* display:contents above the collapse point, so the four figures sit in the
+      shared tracks rather than in a box of their own; a real flex box below it.
+      figure-from / figure-to are alignment hooks: the defect this replaced was
+      only visible geometrically, so Task 14's browser run should assert that
+      their right edges match across every row. */}
   <div class="metric-figures">
-    <span class="figure">{fromFigure}</span>
+    <span class="figure figure-from">{fromFigure}</span>
     <span class="arrow" aria-hidden="true">{arrow}</span>
-    <span class="figure">{toFigure}</span>
+    <span class="figure figure-to">{toFigure}</span>
     <span class="delta">{delta}</span>
   </div>
   {metric.verifiedBy && <Provenance client:visible text={metric.verifiedBy} label={metric.label} />}
@@ -41,9 +49,13 @@ const arrow = metric.direction === 'up-is-good' ? '↑' : '↓';
 <style>
   .metric {
     display: grid;
-    grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr) auto;
+    grid-column: 1 / -1;
+    /* Fallback for engines without subgrid: the row keeps its own tracks and
+       lays out correctly, it just does not align with its neighbours. */
+    grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr) auto auto auto auto;
+    grid-template-columns: subgrid;
     align-items: center;
-    gap: 0.3rem 1rem;
+    row-gap: 0.3rem;
     padding: 0.55rem 0;
     border-bottom: 1px solid var(--rule-soft);
   }
@@ -54,6 +66,9 @@ const arrow = metric.direction === 'up-is-good' ? '↑' : '↓';
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--ink-3);
+    /* The shared column gap is tuned for the gaps between figures; label and
+       bar want a wider one, taken as padding so the tracks stay aligned. */
+    padding-right: 0.55rem;
   }
 
   .metric-track {
@@ -62,6 +77,7 @@ const arrow = metric.direction === 'up-is-good' ? '↑' : '↓';
     background: var(--rule-soft);
     border: 1px solid var(--rule);
     overflow: hidden;
+    margin-right: 0.55rem;
   }
 
   .metric-fill {
@@ -81,33 +97,61 @@ const arrow = metric.direction === 'up-is-good' ? '↑' : '↓';
   }
 
   .metric-figures {
-    display: flex;
-    align-items: baseline;
-    gap: 0.4em;
+    display: contents;
     font-family: var(--mono);
     font-variant-numeric: tabular-nums;
     font-size: 0.85rem;
-    white-space: nowrap;
     color: var(--ink-2);
   }
 
-  .metric-figures .figure {
-    font-variant-numeric: tabular-nums;
+  .figure,
+  .arrow,
+  .delta {
+    white-space: nowrap;
+    /* Figures are read as a column, so they hang off their right edge. */
+    justify-self: end;
   }
 
-  .metric-figures .arrow {
+  .arrow {
     color: var(--ink-3);
+    justify-self: center;
   }
 
-  .metric-figures .delta {
+  .delta {
     color: var(--ink);
     font-weight: 500;
+    padding-left: 0.55rem;
   }
 
   @media (max-width: 30rem) {
     .metric {
       grid-template-columns: minmax(0, 1fr);
       row-gap: 0.4rem;
+    }
+
+    /* Stacked: the figures become a line of their own again. */
+    .metric-figures {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4em;
+    }
+
+    .metric-label {
+      padding-right: 0;
+    }
+
+    .metric-track {
+      margin-right: 0;
+    }
+
+    .figure,
+    .arrow,
+    .delta {
+      justify-self: auto;
+    }
+
+    .delta {
+      padding-left: 0;
     }
   }
 
@@ -127,30 +171,23 @@ const arrow = metric.direction === 'up-is-good' ? '↑' : '↓';
   /* The method apparatus: styling for the Provenance island, expressed here
      because Astro's scoped styles can't reach into a child React island's
      rendered markup. This is the apparatus described in
-     docs/design-direction.md — small, mono, indented, marked with a siglum —
+     docs/design-direction.md — small, mono, indented, marked with a dagger —
      applied as presentation over the Provenance component's fixed contract,
-     not a second mechanism. */
+     not a second mechanism.
+
+     The note is the content and the toggle is a margin control, so the note
+     holds the line and the button sits quietly at its right edge. It was
+     previously an underlined link on its own flush-left line, which read
+     louder than the note it governs — a UI affordance where the direction
+     asks for typography. */
   :global(.provenance) {
     grid-column: 1 / -1;
+    /* flow-root so the floated toggle is contained even when the note it
+       governs is collapsed and there is no in-flow content to hold it. */
+    display: flow-root;
     font-family: var(--mono);
     font-size: 0.72rem;
     color: var(--ink-3);
-  }
-
-  :global(.provenance button) {
-    font: inherit;
-    color: inherit;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
-
-  :global(.provenance button:focus-visible) {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
   }
 
   :global(.provenance p) {
@@ -162,6 +199,55 @@ const arrow = metric.direction === 'up-is-good' ? '↑' : '↓';
   :global(.provenance p::before) {
     content: '\2020  ';
     color: var(--ink-3);
+  }
+
+  :global(.provenance button) {
+    /* Floated rather than placed in a column: a column would reserve its
+       width down the note's whole height, squeezing every wrapped line. The
+       float only shortens the lines it actually sits beside. */
+    float: right;
+    margin: 0.3rem 0 0 1rem;
+    font: inherit;
+    font-size: 0.66rem;
+    letter-spacing: 0.04em;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 0.15rem 0;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  :global(.provenance button:hover) {
+    color: var(--ink-2);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  :global(.provenance button:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Stacked: there is no room to float alongside the note without cutting it
+     to three words a line, so the toggle drops below it instead. */
+  @media (max-width: 30rem) {
+    :global(.provenance) {
+      display: flex;
+      flex-direction: column;
+    }
+
+    :global(.provenance p) {
+      order: 1;
+    }
+
+    :global(.provenance button) {
+      order: 2;
+      float: none;
+      align-self: flex-end;
+      margin: 0.25rem 0 0;
+    }
   }
 
   @media print {
