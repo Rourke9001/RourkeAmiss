@@ -7,7 +7,7 @@ Continue building my personal CV website. A previous session did the design work
 **Project directory:** `C:\Users\Rourke Amiss\Documents\Personal\Projects\RourkeAmiss`
 **Repo:** github.com/Rourke9001/RourkeAmiss (public)
 **Branch:** `feat/site-foundation` — do the work here, `main` holds only the spec and plan
-**HEAD:** `882cfc4`
+**HEAD:** `2550c79`
 
 ## Read these first, in this order
 
@@ -31,26 +31,40 @@ Task briefs are extracted with the skill's `scripts/task-brief PLAN_FILE N`, and
 | 3. CV content model | Complete, review clean |
 | 4. Delta arithmetic | Complete, review clean (1 fix round) |
 | 5. Metric row + provenance island | Complete, review clean |
-| 6. Landing page | **Implemented, review returned Changes Requested. Fix loop not started.** |
+| 6. Landing page | Implemented; review's three findings fixed in fix round 1. **Awaiting re-review.** |
 | 7–15 | Not started |
 
 Stack as actually installed: Astro 7.2.3, React 19.2.8, `@astrojs/react` 6.0.3, Vitest. 22 tests pass. `npm run build` succeeds.
 
-## START HERE — Task 6 has three open findings
+## START HERE — re-review Task 6
 
-All three were confirmed against the rendered page, not just the diff. Begin the fix loop with these.
+Fix round 1 closed all three findings (commit `2550c79`); the ledger records what
+changed and why. Nothing is open. The next step is the re-review of Task 6, then
+Task 7.
 
-**1. Important — `src/components/Metric.astro:44` — the figures do not column-align.**
-Each `Metric` is its own grid container, so column 3 sizes to its own row's content. Measured left edges of the four "from" figures: 1172.3 / 1164.2 / 1205.0 / 1196.8px — a ~40px spread. `docs/design-direction.md` states "the digits must column-align", and that is the design's central promise, so this is the most significant finding. Needs a shared grid — CSS subgrid across `.metrics-list`, or one grid with shared column tracks — not page-level CSS.
+What the fixes touched, so the re-reviewer knows where to look:
 
-**2. Important — `src/components/Metric.astro:140-149` — the provenance toggle is too loud.**
-`:global(.provenance button)` renders "hide method" as an underlined link on its own flush-left line, four times in the hero strip, louder than the notes it controls. `docs/design-direction.md` says the apparatus is "typographic, not a UI affordance". Fixable in CSS alone — the button's text and `aria-*` contract are fixed by Task 5's tests in `tests/unit/provenance.test.tsx` and must not change.
+- **New `src/components/MetricList.astro`** owns the trace strip's column tracks;
+  each `Metric` row is now `grid-template-columns: subgrid`. Six tracks — label,
+  bar, from, arrow, to, delta — so every figure holds its own column. Task 7's
+  `/cv` page must wrap its metrics in `<MetricList>`, not a bare div.
+- **`Metric.astro`** — the method toggle is unlined at rest and floated into the
+  note's right margin, dropping beneath the note below 30rem. Button text and
+  `aria-*` contract untouched; `tests/unit/provenance.test.tsx` still passes.
+- **`Masthead.astro`** — the contact row is two deliberate rows, with separators
+  generated on the item that follows them.
 
-**3. Minor — `src/components/Masthead.astro:205-214` — "LinkedIn" orphans onto its own line** in the contact row, at every viewport (`.sheet` caps at 47rem, so the wrap is content-determined).
+**Look at the rendered page yourself.** All three findings came from screenshots,
+not diffs, and the unit suite cannot catch a geometric regression. The Chrome
+extension may not be connected; headless Chrome works directly:
 
-Findings 1 and 2 live in `Metric.astro`, nominally Task 5's file, but only become visible once four metrics sit together on a real page — so they belong to Task 6's fix loop.
+```
+npx astro dev --background
+"/c/Program Files/Google/Chrome/Application/chrome.exe" --headless=new --disable-gpu   --hide-scrollbars --virtual-time-budget=4000 --window-size=1280,1400   --screenshot=out.png "http://localhost:4321/"
+```
 
-**Look at the rendered page yourself** before and after fixing. `npm run build && npm run preview` serves on :4321. The previous session found all three of these by screenshotting the page; none surfaced from reading diffs.
+Headless clamps the viewport to a 500px minimum, so narrow widths must be checked
+by loading the page in a fixed-width iframe from a temporary file in `public/`.
 
 ## Hard constraints — these are not style preferences
 
