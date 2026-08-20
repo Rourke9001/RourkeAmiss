@@ -1,0 +1,41 @@
+---
+// Static Web Apps serves this for unmatched routes via the responseOverrides
+// 404 rewrite in staticwebapp.config.json.
+import Base from '../layouts/Base.astro';
+---
+<Base title="Not found — Rourke Amiss" description="That page does not exist." page="none">
+  <section class="notfound">
+    <p class="code">404</p>
+    <h1>That page does not exist.</h1>
+    <p class="lede">
+      The pages that do: <a href="/">the site</a>, <a href="/work/">the case studies</a>,
+      and <a href="/cv/">the CV</a>.
+    </p>
+  </section>
+
+  <style>
+    .notfound {
+      padding: 2rem 0;
+    }
+
+    .code {
+      margin: 0 0 0.4rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      color: var(--ink-2);
+    }
+
+    .notfound h1 {
+      margin: 0 0 0.6rem;
+      font-family: var(--serif);
+      font-size: 1.6rem;
+    }
+
+    .lede {
+      margin: 0;
+      max-width: 30rem;
+      color: var(--ink-2);
+    }
+  </style>
+</Base>

@@ -1,0 +1,68 @@
+/* Print stylesheet for /cv only — imported by src/pages/cv.astro and by no
+   other page. Derived from the source artifact's own print rules per the
+   spec's Print section: light tokens forced, rules preserved, entries kept
+   whole across page breaks, links unstyled.
+
+   The forced light tokens are not the screen tokens: they are pushed to true
+   black on true white, because a screen palette tuned for a backlit --paper
+   prints grey and washed out. */
+@media print {
+  /* Specificity deliberately matched to the theme blocks in tokens.css, which
+     select :root:not([data-theme='light']) and :root[data-theme='dark'] — both
+     (0,2,0). A bare :root here is (0,1,0) and would lose to them, printing
+     near-white ink onto white paper for anyone who pins a dark theme. Browsers
+     evaluate prefers-color-scheme as light while printing, so the media-query
+     case is already safe; an explicit data-theme is not. */
+  :root,
+  :root:not([data-theme='light']),
+  :root[data-theme='dark'],
+  :root[data-theme='light'] {
+    --paper: #FFFFFF;
+    --ink: #000000;
+    --ink-2: #1F2428;
+    --ink-3: #5A6169;
+    --rule: #C9CFD4;
+    --rule-soft: #F0F2F4;
+    --accent: #143F4B;
+    --accent-2: #143F4B;
+  }
+
+  body {
+    font-size: 10.2pt;
+    line-height: 1.42;
+    background: #FFFFFF;
+  }
+
+  .sheet {
+    max-width: none;
+    padding: 0;
+    gap: 1.2rem;
+  }
+
+  .entry {
+    break-inside: avoid;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  /* Interactive chrome never prints.
+
+     !important is load-bearing here, not laziness. Astro scopes a component's
+     styles by appending a data attribute, so Base.astro's `.site-nav { display:
+     flex }` compiles to `.site-nav[data-astro-cid-...]` at specificity (0,2,0)
+     and beats a bare `nav` at (0,0,1) — the nav printed on the CV until this
+     was raised. The scope hash changes per build, so it cannot be matched
+     literally, and this is exactly the case !important exists for: a print
+     rule overriding a screen rule it cannot out-specify.
+
+     This is the second instance of the same trap in this stylesheet; the first
+     was the forced light tokens losing to the dark-theme selectors. */
+  .provenance button,
+  .request,
+  nav,
+  footer {
+    display: none !important;
+  }
+}

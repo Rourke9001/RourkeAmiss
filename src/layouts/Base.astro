@@ -1,0 +1,91 @@
+---
+import { Font } from 'astro:assets';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import { cv } from '../content/cv/cv';
+
+interface Props {
+  title: string;
+  description: string;
+  // 'none' exists so a page outside the nav — /404 — can decline to mark any
+  // link current. Without it the default claimed Home was the current page.
+  page?: 'home' | 'cv' | 'work' | 'none';
+}
+
+const { title, description, page = 'home' } = Astro.props;
+
+// The target domain, pointed at Static Web Apps at deploy time. Not part of
+// the Cv shape, so it lives here rather than as an invented cv.ts field.
+const siteUrl = 'https://rourkeamiss.co.za';
+
+// JSON-LD Person schema, built FROM cv.ts so it cannot drift from the page —
+// see "Single source of truth" in the design spec. No phone number.
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: cv.name,
+  jobTitle: cv.positionLine,
+  email: `mailto:${cv.email}`,
+  url: siteUrl,
+  sameAs: [cv.github, cv.linkedin],
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Johannesburg',
+  },
+};
+---
+<!doctype html>
+<html lang="en-ZA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <Font cssVariable="--font-sans" preload={[{ weight: 400, style: 'normal' }]} />
+    <Font cssVariable="--font-serif" />
+    <Font cssVariable="--font-mono" />
+    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+  </head>
+  <body>
+    <div class="sheet">
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/" aria-current={page === 'home' ? 'page' : undefined}>Home</a>
+        <a href="/work/" aria-current={page === 'work' ? 'page' : undefined}>Work</a>
+        <a href="/cv/" aria-current={page === 'cv' ? 'page' : undefined}>CV</a>
+      </nav>
+      <main id="content">
+        <slot />
+      </main>
+    </div>
+
+    <style>
+      /* Both /cv and /work are reachable from here; print.css hides the nav
+         entirely, so it never appears on a printed CV. */
+      .site-nav {
+        display: flex;
+        gap: 1.1rem;
+        margin-bottom: 2rem;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .site-nav a {
+        color: var(--ink-2);
+        text-decoration: none;
+        padding-bottom: 0.15rem;
+        border-bottom: 1px solid transparent;
+      }
+
+      .site-nav a:hover {
+        border-bottom-color: var(--rule);
+      }
+
+      .site-nav a[aria-current='page'] {
+        color: var(--ink);
+        border-bottom-color: var(--accent);
+      }
+    </style>
+  </body>
+</html>

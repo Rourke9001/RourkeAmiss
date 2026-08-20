@@ -1,0 +1,21 @@
+{
+  "name": "rourkeamiss-api",
+  "version": "1.0.0",
+  "description": "Request-CV endpoint. Emails Rourke rather than serving a file.",
+  "main": "dist/src/functions/*.js",
+  "scripts": {
+    "build": "tsc",
+    "prestart": "npm run build",
+    "start": "func start"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@azure/communication-email": "^1.1.0",
+    "@azure/functions": "^4.16.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "typescript": "^7.0.2"
+  }
+}

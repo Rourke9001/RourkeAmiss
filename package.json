@@ -1,0 +1,44 @@
+{
+  "name": "rourkeamiss",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check:forbidden": "node --experimental-strip-types scripts/check-forbidden.ts dist",
+    "readme": "node --experimental-strip-types scripts/generate-readme.ts",
+    "readme:publish": "node --experimental-strip-types scripts/publish-readme.ts",
+    "check:csp": "node --experimental-strip-types scripts/check-csp.ts dist",
+    "pretest:e2e": "astro preview --background",
+    "test:e2e": "playwright test",
+    "posttest:e2e": "astro preview stop"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^7.0.7",
+    "@astrojs/react": "^6.0.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "astro": "^7.2.3",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.62.1",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^26.2.0",
+    "@vitejs/plugin-react": "^6.0.5",
+    "jsdom": "^30.0.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
+  }
+}

@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node 22 deliberately matches the apiRuntime in
+      # public/staticwebapp.config.json, so the API is tested on the runtime it
+      # deploys to rather than on whatever the runner happens to ship.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      # The API is its own package. Its dependencies must be installed before
+      # the unit suite runs: vitest aliases the ACS SDK to api/node_modules so
+      # that mocking it in tests intercepts the same module the API resolves.
+      - run: npm ci --prefix api
+
+      - name: Type-check
+        run: npx astro check
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Never-publish guard
+        run: npm run check:forbidden
+
+      # Fails if any inline script or style in the built output is missing its
+      # CSP hash. Without this a page can build clean, pass every test, and
+      # still ship with a form that never hydrates and bars that never draw.
+      - name: CSP coverage guard
+        run: npm run check:csp
+
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+
+      # Accessibility on every route, plus the geometric assertions no unit
+      # test can make. Starts and stops the preview server itself.
+      - name: End-to-end and accessibility
+        run: npm run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

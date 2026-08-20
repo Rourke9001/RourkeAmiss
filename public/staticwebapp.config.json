@@ -1,0 +1,32 @@
+{
+  "platform": {
+    "apiRuntime": "node:22"
+  },
+  "trailingSlash": "auto",
+  "globalHeaders": {
+    "Content-Security-Policy": "frame-ancestors 'none'",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+    "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload"
+  },
+  "routes": [
+    {
+      "route": "/api/*",
+      "methods": [
+        "GET",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "HEAD",
+        "OPTIONS"
+      ],
+      "statusCode": 405
+    }
+  ],
+  "responseOverrides": {
+    "404": {
+      "rewrite": "/404.html"
+    }
+  }
+}

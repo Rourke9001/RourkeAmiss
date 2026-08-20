@@ -1,0 +1,110 @@
+---
+// The landing page. Evidence before prose, per spec §5 and
+// docs/design-direction.md: masthead, then the metrics ledger, then the
+// profile paragraph, then experience, projects, skills, and finally the
+// request-CV section.
+import Base from '../layouts/Base.astro';
+import Masthead from '../components/Masthead.astro';
+import Metric from '../components/Metric.astro';
+import MetricList from '../components/MetricList.astro';
+import Entry from '../components/Entry.astro';
+import RequestSection from '../components/RequestSection.astro';
+import { cv } from '../content/cv/cv';
+---
+<Base title={`${cv.name} — ${cv.positionLine}`} description={cv.profile} page="home">
+  <Masthead cv={cv} />
+
+  <section class="metrics-ledger" aria-labelledby="metrics-heading">
+    <h2 id="metrics-heading" class="metrics-heading">Measured</h2>
+    <MetricList>
+      {cv.headlineMetrics.map((metric) => <Metric metric={metric} />)}
+    </MetricList>
+  </section>
+
+  <section class="band">
+    <h2 class="gutter">Profile</h2>
+    <p class="profile">{cv.profile}</p>
+  </section>
+
+  <section class="band">
+    <h2 class="gutter">Experience</h2>
+    <div>
+      {cv.roles.map((role) => (
+        <Entry
+          title={role.org}
+          subtitle={role.title}
+          period={role.period}
+          context={role.context}
+          bullets={role.bullets}
+        />
+      ))}
+    </div>
+  </section>
+
+  <section class="band">
+    <h2 class="gutter">Projects</h2>
+    <div>
+      {cv.projects.map((project) => (
+        <Entry
+          title={project.name}
+          period={project.period}
+          context={project.context}
+          bullets={project.bullets}
+          links={project.links}
+        />
+      ))}
+    </div>
+  </section>
+
+  <section class="band">
+    <h2 class="gutter">Skills</h2>
+    <div class="skills">
+      {cv.skills.map((group) => (
+        <div class="skill-group">
+          <h3>{group.label}</h3>
+          <p>{group.items.join(', ')}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <RequestSection />
+
+  <style>
+    .metrics-heading {
+      margin: 0 0 0.6rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      font-weight: 400;
+    }
+
+    .profile {
+      margin: 0;
+      color: var(--ink-2);
+    }
+
+    .skills {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .skill-group h3 {
+      margin: 0 0 0.2rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .skill-group p {
+      margin: 0;
+      color: var(--ink-2);
+    }
+  </style>
+</Base>

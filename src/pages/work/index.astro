@@ -1,0 +1,95 @@
+---
+// The case study index. Drafts are filtered here rather than in the loader so
+// that an unfinished study can sit in the repo with valid frontmatter and
+// still be impossible to reach: unlisted here, and no route generated for it.
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const studies = (await getCollection('work', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+<Base
+  title="Work — Rourke Amiss"
+  description="Case studies: what was measured, in what order it was fixed, and how the result was proven to hold."
+  page="work"
+>
+  <header class="head">
+    <h1>Work</h1>
+    <p class="lede">
+      Each of these is written as the working method rather than as a story: what the
+      situation was, what I measured before touching anything, the order I fixed it in,
+      and how I proved the result held.
+    </p>
+  </header>
+
+  <ul class="studies">
+    {studies.map((study) => (
+      <li class="study">
+        <p class="period">{study.data.period}</p>
+        <h2>
+          <a href={`/work/${study.id}/`}>{study.data.title}</a>
+        </h2>
+        <p class="summary">{study.data.summary}</p>
+        <p class="stack">{study.data.stack.join(' · ')}</p>
+      </li>
+    ))}
+  </ul>
+
+  <style>
+    .head h1 {
+      margin: 0 0 0.4rem;
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      line-height: 1.15;
+    }
+
+    .lede {
+      margin: 0 0 2rem;
+      max-width: 34rem;
+      color: var(--ink-2);
+    }
+
+    .studies {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.8rem;
+    }
+
+    .study {
+      border-top: 1px solid var(--rule);
+      padding-top: 0.8rem;
+    }
+
+    .period {
+      margin: 0 0 0.3rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      color: var(--ink-2);
+    }
+
+    .study h2 {
+      margin: 0 0 0.4rem;
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      line-height: 1.25;
+    }
+
+    .summary {
+      margin: 0 0 0.4rem;
+      max-width: 34rem;
+      color: var(--ink-2);
+    }
+
+    .stack {
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--ink-2);
+    }
+  </style>
+</Base>

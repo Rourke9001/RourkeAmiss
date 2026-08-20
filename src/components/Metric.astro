@@ -1,0 +1,505 @@
+---
+// The trace strip row — see "Signature: the trace strip" in
+// docs/design-direction.md. Every bar is normalised to its own baseline: full
+// width is `from`, the filled portion is `to` as a fraction of `from`
+// (barFraction), so bars of different units still read against each other on
+// one axis — shorter is more debt repaid.
+//
+// The row owns no column tracks of its own: it is a subgrid of <MetricList>,
+// which is what makes the figures column-align across rows.
+import type { Metric } from '../content/cv/types';
+import { barFraction, formatFigure, formatDelta } from '../lib/metrics';
+import { Provenance } from './Provenance';
+
+interface Props {
+  metric: Metric;
+}
+
+const { metric } = Astro.props;
+
+const fraction = barFraction(metric.from, metric.to);
+const fillPercent = fraction * 100;
+const fromFigure = formatFigure(metric.from, metric.unit);
+const toFigure = formatFigure(metric.to, metric.unit);
+const delta = formatDelta(metric.from, metric.to);
+// Colour is never the only carrier of meaning: the arrow direction and the
+// sign already baked into `delta` both encode up-is-good vs down-is-good.
+const arrow = metric.direction === 'up-is-good' ? '↑' : '↓';
+// The fill width comes from a class on a static scale, never a style
+// attribute: no hash can cover an attribute, so a hashed style-src would have
+// blanked every bar in the strip. A class resolves against the component's
+// scoped stylesheet, which Astro hashes for us, and needs no JavaScript.
+// Quantised to 0.5% — ~2px on a real bar, and the exact figures sit beside it
+// in tabular numerals, unrounded.
+const fillStep = Math.round(fillPercent * 2);
+---
+
+<div class="metric" data-metric={metric.label} data-direction={metric.direction}>
+  <div class="metric-label">{metric.label}</div>
+  <div class="metric-track" data-metric-track>
+    <div class={`metric-fill w-${fillStep}`} data-metric-fill></div>
+  </div>
+  {/* display:contents above the collapse point, so the four figures sit in the
+      shared tracks rather than in a box of their own; a real flex box below it.
+      figure-from / figure-to are alignment hooks for the e2e test: the defect
+      this replaced was visible only as geometry, so the assertion has to be
+      that their right edges match across every row. */}
+  <div class="metric-figures">
+    <span class="figure figure-from">{fromFigure}</span>
+    <span class="arrow" aria-hidden="true">{arrow}</span>
+    <span class="figure figure-to">{toFigure}</span>
+    <span class="delta">{delta}</span>
+  </div>
+  {metric.verifiedBy && <Provenance client:visible text={metric.verifiedBy} label={metric.label} />}
+</div>
+
+<style>
+  /* Static width scale in 0.5% steps — see the note above the markup for why
+     the fill cannot use a style attribute. */
+  .w-0 { width: 0.0%; }
+  .w-1 { width: 0.5%; }
+  .w-2 { width: 1.0%; }
+  .w-3 { width: 1.5%; }
+  .w-4 { width: 2.0%; }
+  .w-5 { width: 2.5%; }
+  .w-6 { width: 3.0%; }
+  .w-7 { width: 3.5%; }
+  .w-8 { width: 4.0%; }
+  .w-9 { width: 4.5%; }
+  .w-10 { width: 5.0%; }
+  .w-11 { width: 5.5%; }
+  .w-12 { width: 6.0%; }
+  .w-13 { width: 6.5%; }
+  .w-14 { width: 7.0%; }
+  .w-15 { width: 7.5%; }
+  .w-16 { width: 8.0%; }
+  .w-17 { width: 8.5%; }
+  .w-18 { width: 9.0%; }
+  .w-19 { width: 9.5%; }
+  .w-20 { width: 10.0%; }
+  .w-21 { width: 10.5%; }
+  .w-22 { width: 11.0%; }
+  .w-23 { width: 11.5%; }
+  .w-24 { width: 12.0%; }
+  .w-25 { width: 12.5%; }
+  .w-26 { width: 13.0%; }
+  .w-27 { width: 13.5%; }
+  .w-28 { width: 14.0%; }
+  .w-29 { width: 14.5%; }
+  .w-30 { width: 15.0%; }
+  .w-31 { width: 15.5%; }
+  .w-32 { width: 16.0%; }
+  .w-33 { width: 16.5%; }
+  .w-34 { width: 17.0%; }
+  .w-35 { width: 17.5%; }
+  .w-36 { width: 18.0%; }
+  .w-37 { width: 18.5%; }
+  .w-38 { width: 19.0%; }
+  .w-39 { width: 19.5%; }
+  .w-40 { width: 20.0%; }
+  .w-41 { width: 20.5%; }
+  .w-42 { width: 21.0%; }
+  .w-43 { width: 21.5%; }
+  .w-44 { width: 22.0%; }
+  .w-45 { width: 22.5%; }
+  .w-46 { width: 23.0%; }
+  .w-47 { width: 23.5%; }
+  .w-48 { width: 24.0%; }
+  .w-49 { width: 24.5%; }
+  .w-50 { width: 25.0%; }
+  .w-51 { width: 25.5%; }
+  .w-52 { width: 26.0%; }
+  .w-53 { width: 26.5%; }
+  .w-54 { width: 27.0%; }
+  .w-55 { width: 27.5%; }
+  .w-56 { width: 28.0%; }
+  .w-57 { width: 28.5%; }
+  .w-58 { width: 29.0%; }
+  .w-59 { width: 29.5%; }
+  .w-60 { width: 30.0%; }
+  .w-61 { width: 30.5%; }
+  .w-62 { width: 31.0%; }
+  .w-63 { width: 31.5%; }
+  .w-64 { width: 32.0%; }
+  .w-65 { width: 32.5%; }
+  .w-66 { width: 33.0%; }
+  .w-67 { width: 33.5%; }
+  .w-68 { width: 34.0%; }
+  .w-69 { width: 34.5%; }
+  .w-70 { width: 35.0%; }
+  .w-71 { width: 35.5%; }
+  .w-72 { width: 36.0%; }
+  .w-73 { width: 36.5%; }
+  .w-74 { width: 37.0%; }
+  .w-75 { width: 37.5%; }
+  .w-76 { width: 38.0%; }
+  .w-77 { width: 38.5%; }
+  .w-78 { width: 39.0%; }
+  .w-79 { width: 39.5%; }
+  .w-80 { width: 40.0%; }
+  .w-81 { width: 40.5%; }
+  .w-82 { width: 41.0%; }
+  .w-83 { width: 41.5%; }
+  .w-84 { width: 42.0%; }
+  .w-85 { width: 42.5%; }
+  .w-86 { width: 43.0%; }
+  .w-87 { width: 43.5%; }
+  .w-88 { width: 44.0%; }
+  .w-89 { width: 44.5%; }
+  .w-90 { width: 45.0%; }
+  .w-91 { width: 45.5%; }
+  .w-92 { width: 46.0%; }
+  .w-93 { width: 46.5%; }
+  .w-94 { width: 47.0%; }
+  .w-95 { width: 47.5%; }
+  .w-96 { width: 48.0%; }
+  .w-97 { width: 48.5%; }
+  .w-98 { width: 49.0%; }
+  .w-99 { width: 49.5%; }
+  .w-100 { width: 50.0%; }
+  .w-101 { width: 50.5%; }
+  .w-102 { width: 51.0%; }
+  .w-103 { width: 51.5%; }
+  .w-104 { width: 52.0%; }
+  .w-105 { width: 52.5%; }
+  .w-106 { width: 53.0%; }
+  .w-107 { width: 53.5%; }
+  .w-108 { width: 54.0%; }
+  .w-109 { width: 54.5%; }
+  .w-110 { width: 55.0%; }
+  .w-111 { width: 55.5%; }
+  .w-112 { width: 56.0%; }
+  .w-113 { width: 56.5%; }
+  .w-114 { width: 57.0%; }
+  .w-115 { width: 57.5%; }
+  .w-116 { width: 58.0%; }
+  .w-117 { width: 58.5%; }
+  .w-118 { width: 59.0%; }
+  .w-119 { width: 59.5%; }
+  .w-120 { width: 60.0%; }
+  .w-121 { width: 60.5%; }
+  .w-122 { width: 61.0%; }
+  .w-123 { width: 61.5%; }
+  .w-124 { width: 62.0%; }
+  .w-125 { width: 62.5%; }
+  .w-126 { width: 63.0%; }
+  .w-127 { width: 63.5%; }
+  .w-128 { width: 64.0%; }
+  .w-129 { width: 64.5%; }
+  .w-130 { width: 65.0%; }
+  .w-131 { width: 65.5%; }
+  .w-132 { width: 66.0%; }
+  .w-133 { width: 66.5%; }
+  .w-134 { width: 67.0%; }
+  .w-135 { width: 67.5%; }
+  .w-136 { width: 68.0%; }
+  .w-137 { width: 68.5%; }
+  .w-138 { width: 69.0%; }
+  .w-139 { width: 69.5%; }
+  .w-140 { width: 70.0%; }
+  .w-141 { width: 70.5%; }
+  .w-142 { width: 71.0%; }
+  .w-143 { width: 71.5%; }
+  .w-144 { width: 72.0%; }
+  .w-145 { width: 72.5%; }
+  .w-146 { width: 73.0%; }
+  .w-147 { width: 73.5%; }
+  .w-148 { width: 74.0%; }
+  .w-149 { width: 74.5%; }
+  .w-150 { width: 75.0%; }
+  .w-151 { width: 75.5%; }
+  .w-152 { width: 76.0%; }
+  .w-153 { width: 76.5%; }
+  .w-154 { width: 77.0%; }
+  .w-155 { width: 77.5%; }
+  .w-156 { width: 78.0%; }
+  .w-157 { width: 78.5%; }
+  .w-158 { width: 79.0%; }
+  .w-159 { width: 79.5%; }
+  .w-160 { width: 80.0%; }
+  .w-161 { width: 80.5%; }
+  .w-162 { width: 81.0%; }
+  .w-163 { width: 81.5%; }
+  .w-164 { width: 82.0%; }
+  .w-165 { width: 82.5%; }
+  .w-166 { width: 83.0%; }
+  .w-167 { width: 83.5%; }
+  .w-168 { width: 84.0%; }
+  .w-169 { width: 84.5%; }
+  .w-170 { width: 85.0%; }
+  .w-171 { width: 85.5%; }
+  .w-172 { width: 86.0%; }
+  .w-173 { width: 86.5%; }
+  .w-174 { width: 87.0%; }
+  .w-175 { width: 87.5%; }
+  .w-176 { width: 88.0%; }
+  .w-177 { width: 88.5%; }
+  .w-178 { width: 89.0%; }
+  .w-179 { width: 89.5%; }
+  .w-180 { width: 90.0%; }
+  .w-181 { width: 90.5%; }
+  .w-182 { width: 91.0%; }
+  .w-183 { width: 91.5%; }
+  .w-184 { width: 92.0%; }
+  .w-185 { width: 92.5%; }
+  .w-186 { width: 93.0%; }
+  .w-187 { width: 93.5%; }
+  .w-188 { width: 94.0%; }
+  .w-189 { width: 94.5%; }
+  .w-190 { width: 95.0%; }
+  .w-191 { width: 95.5%; }
+  .w-192 { width: 96.0%; }
+  .w-193 { width: 96.5%; }
+  .w-194 { width: 97.0%; }
+  .w-195 { width: 97.5%; }
+  .w-196 { width: 98.0%; }
+  .w-197 { width: 98.5%; }
+  .w-198 { width: 99.0%; }
+  .w-199 { width: 99.5%; }
+  .w-200 { width: 100.0%; }
+
+  .metric {
+    display: grid;
+    grid-column: 1 / -1;
+    /* Fallback for engines without subgrid: the row keeps its own tracks and
+       lays out correctly, it just does not align with its neighbours. */
+    grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr) auto auto auto auto;
+    grid-template-columns: subgrid;
+    align-items: center;
+    row-gap: 0.3rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+
+  .metric-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    /* The shared column gap is tuned for the gaps between figures; label and
+       bar want a wider one, taken as padding so the tracks stay aligned. */
+    padding-right: 0.55rem;
+  }
+
+  .metric-track {
+    position: relative;
+    height: 0.55rem;
+    background: var(--rule-soft);
+    border: 1px solid var(--rule);
+    overflow: hidden;
+    margin-right: 0.55rem;
+  }
+
+  .metric-fill {
+    position: absolute;
+    inset: 0;
+    transform-origin: left;
+    transform: scaleX(1);
+    transition: transform 0.6s ease-out;
+  }
+
+  .metric[data-direction='up-is-good'] .metric-fill {
+    background: var(--accent);
+  }
+
+  .metric[data-direction='down-is-good'] .metric-fill {
+    background: var(--ink-3);
+  }
+
+  .metric-figures {
+    display: contents;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.85rem;
+    color: var(--ink-2);
+  }
+
+  .figure,
+  .arrow,
+  .delta {
+    white-space: nowrap;
+    /* Figures are read as a column, so they hang off their right edge. */
+    justify-self: end;
+  }
+
+  .arrow {
+    color: var(--ink-3);
+    justify-self: center;
+  }
+
+  .delta {
+    color: var(--ink);
+    font-weight: 500;
+    padding-left: 0.55rem;
+  }
+
+  @media (max-width: 30rem) {
+    .metric {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 0.4rem;
+    }
+
+    /* Stacked: the figures become a line of their own again. */
+    .metric-figures {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4em;
+    }
+
+    .metric-label {
+      padding-right: 0;
+    }
+
+    .metric-track {
+      margin-right: 0;
+    }
+
+    .figure,
+    .arrow,
+    .delta {
+      justify-self: auto;
+    }
+
+    .delta {
+      padding-left: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .metric-fill {
+      transition: none !important;
+      transform: scaleX(1) !important;
+    }
+  }
+
+  @media print {
+    .metric-track {
+      display: none;
+    }
+  }
+
+  /* The method apparatus: styling for the Provenance island, expressed here
+     because Astro's scoped styles can't reach into a child React island's
+     rendered markup. This is the apparatus described in
+     docs/design-direction.md — small, mono, indented, marked with a dagger —
+     applied as presentation over the Provenance component's fixed contract,
+     not a second mechanism.
+
+     The note is the content and the toggle is a margin control, so the note
+     holds the line and the button sits quietly at its right edge. It was
+     previously an underlined link on its own flush-left line, which read
+     louder than the note it governs — a UI affordance where the direction
+     asks for typography. */
+  :global(.provenance) {
+    grid-column: 1 / -1;
+    /* flow-root so the floated toggle is contained even when the note it
+       governs is collapsed and there is no in-flow content to hold it. */
+    display: flow-root;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--ink-3);
+  }
+
+  :global(.provenance p) {
+    margin: 0.3rem 0 0 1.4rem;
+    padding-left: 0.6rem;
+    border-left: 1px solid var(--rule);
+  }
+
+  :global(.provenance p::before) {
+    content: '\2020  ';
+    color: var(--ink-3);
+  }
+
+  :global(.provenance button) {
+    /* Floated rather than placed in a column: a column would reserve its
+       width down the note's whole height, squeezing every wrapped line. The
+       float only shortens the lines it actually sits beside. */
+    float: right;
+    margin: 0.3rem 0 0 1rem;
+    font: inherit;
+    font-size: 0.66rem;
+    letter-spacing: 0.04em;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 0.15rem 0;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  :global(.provenance button:hover) {
+    color: var(--ink-2);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  :global(.provenance button:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Stacked: there is no room to float alongside the note without cutting it
+     to three words a line, so the toggle drops below it instead. */
+  @media (max-width: 30rem) {
+    :global(.provenance) {
+      display: flex;
+      flex-direction: column;
+    }
+
+    :global(.provenance p) {
+      order: 1;
+    }
+
+    :global(.provenance button) {
+      order: 2;
+      float: none;
+      align-self: flex-end;
+      margin: 0.25rem 0 0;
+    }
+  }
+
+  @media print {
+    :global(.provenance button) {
+      display: none;
+    }
+
+    :global(.provenance p) {
+      display: block !important;
+    }
+  }
+</style>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fills = document.querySelectorAll<HTMLElement>('[data-metric-fill]');
+
+  // 'IntersectionObserver' in window is checked because the bars are collapsed
+  // to zero width by this script and only restored by the observer. If the
+  // constructor is missing or throws AFTER the fills are blanked, the strip —
+  // the landing page's headline evidence — renders as four empty tracks with no
+  // path back. Nothing is blanked until the observer exists.
+  if (!reduceMotion && fills.length && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((entry) => entry.isIntersecting);
+        visible.forEach((entry, index) => {
+          const fill = entry.target.querySelector<HTMLElement>('[data-metric-fill]');
+          if (!fill) return;
+          fill.style.transitionDelay = `${index * 60}ms`;
+          fill.style.transform = 'scaleX(1)';
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.4 },
+    );
+
+    fills.forEach((fill) => {
+      fill.style.transform = 'scaleX(0)';
+    });
+
+    document.querySelectorAll('[data-metric]').forEach((el) => observer.observe(el));
+  }
+</script>
