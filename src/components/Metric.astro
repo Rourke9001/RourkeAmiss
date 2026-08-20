@@ -25,14 +25,12 @@ const delta = formatDelta(metric.from, metric.to);
 // Colour is never the only carrier of meaning: the arrow direction and the
 // sign already baked into `delta` both encode up-is-good vs down-is-good.
 const arrow = metric.direction === 'up-is-good' ? '↑' : '↓';
-// The fill width is carried by a class from a static scale, not by a style
-// attribute. A CSP that hashes inline styles cannot whitelist style attributes
-// at all — hashes do not apply to them, and CSP3 makes 'unsafe-inline' inert
-// once any hash is present — so an attribute here would have blanked every bar
-// in the trace strip. A class resolves against the component's own scoped
-// stylesheet, which Astro hashes automatically, and it still works with
-// JavaScript disabled. Quantised to 0.5%: at most ~2px on a real bar, while
-// the exact figures sit beside it in tabular numerals and are never rounded.
+// The fill width comes from a class on a static scale, never a style
+// attribute: no hash can cover an attribute, so a hashed style-src would have
+// blanked every bar in the strip. A class resolves against the component's
+// scoped stylesheet, which Astro hashes for us, and needs no JavaScript.
+// Quantised to 0.5% — ~2px on a real bar, and the exact figures sit beside it
+// in tabular numerals, unrounded.
 const fillStep = Math.round(fillPercent * 2);
 ---
 
@@ -43,9 +41,9 @@ const fillStep = Math.round(fillPercent * 2);
   </div>
   {/* display:contents above the collapse point, so the four figures sit in the
       shared tracks rather than in a box of their own; a real flex box below it.
-      figure-from / figure-to are alignment hooks: the defect this replaced was
-      only visible geometrically, so Task 14's browser run should assert that
-      their right edges match across every row. */}
+      figure-from / figure-to are alignment hooks for the e2e test: the defect
+      this replaced was visible only as geometry, so the assertion has to be
+      that their right edges match across every row. */}
   <div class="metric-figures">
     <span class="figure figure-from">{fromFigure}</span>
     <span class="arrow" aria-hidden="true">{arrow}</span>

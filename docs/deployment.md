@@ -90,9 +90,8 @@ az consumption budget create \
   --resource-group rg-rourkeamiss-site
 ```
 
-Note, against the version of this command in the implementation plan:
-`--start-date` and `--end-date` are **required**, and `--category` and
-`--time-grain` take lowercase values. The plan's form would have failed. Checked
+Note that `--start-date` and `--end-date` are **required**, and `--category`
+and `--time-grain` take lowercase values — a form omitting them fails. Checked
 against `az consumption budget create --help` on CLI 2.88.0, where the
 `consumption` command group still reports itself as in preview — if it has moved
 on, the portal's Cost Management → Budgets does the same job. Add an alert at 80%.

@@ -1,19 +1,8 @@
 ---
 // One role or one project, in the main column of a .band section. Role and
-// Project (src/content/cv/types.ts) differ in shape — a Role has `org` +
-// `title`, a Project has `name` (and optional `links`) — so this component
-// takes a deliberately generic prop interface rather than a union of the two:
-//
-//   title     the accent-coloured heading fragment: a role's `org`, or a
-//             project's `name`.
-//   subtitle  an optional plain-weight fragment appended after the title
-//             with an em dash. Roles pass their `title` (job title) here;
-//             projects have nothing equivalent and omit it.
-//   links     optional, project-only in practice, but kept generic so the
-//             component doesn't know about "roles" or "projects" at all.
-//
-// The call sites (src/pages/index.astro) do the mapping from each CV shape
-// onto this interface; Entry itself only knows about entries.
+// Project (src/content/cv/types.ts) differ in shape, so this takes a generic
+// entry interface rather than a union of the two: index.astro maps each CV
+// shape onto it, and Entry itself knows nothing about roles or projects.
 interface EntryLink {
   label: string;
   href: string;

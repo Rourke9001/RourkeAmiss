@@ -14,9 +14,8 @@ interface Props {
 
 const { title, description, page = 'home' } = Astro.props;
 
-// The target domain from docs/superpowers/specs/2026-08-18-personal-site-design.md
-// (configured last, at deploy time). Not part of the Cv shape, so it lives
-// here as a constant rather than being invented as a fake cv.ts field.
+// The target domain, pointed at Static Web Apps at deploy time. Not part of
+// the Cv shape, so it lives here rather than as an invented cv.ts field.
 const siteUrl = 'https://rourkeamiss.co.za';
 
 // JSON-LD Person schema, built FROM cv.ts so it cannot drift from the page —
@@ -60,9 +59,8 @@ const personSchema = {
     </div>
 
     <style>
-      /* The `page` prop existed from Task 2 for exactly this and went unused
-         until /work landed. Both /cv and /work are routes in the spec's route
-         table, so both are reachable; print.css hides nav entirely. */
+      /* Both /cv and /work are reachable from here; print.css hides the nav
+         entirely, so it never appears on a printed CV. */
       .site-nav {
         display: flex;
         gap: 1.1rem;
