@@ -25,11 +25,16 @@ export interface CspFinding {
 
 const sha256 = (body: string) => `sha256-${createHash('sha256').update(body, 'utf8').digest('base64')}`;
 
+/**
+ * Matches the directive as a whole token, not as a substring. `indexOf` would
+ * let `script-src-elem` shadow `script-src` and read hashes out of the wrong
+ * directive — which can fail either way round, and the way that passes wrongly
+ * is the one that ships a broken page.
+ */
 function hashesFor(meta: string, directive: string): Set<string> {
-  const at = meta.indexOf(directive);
-  if (at === -1) return new Set();
-  const part = meta.slice(at).split(';')[0];
-  return new Set([...part.matchAll(/'(sha256-[^']+)'/g)].map((m) => m[1]));
+  const m = new RegExp(String.raw`(?:^|;)\s*` + directive + String.raw`\s+([^;]*)`).exec(meta);
+  if (!m) return new Set();
+  return new Set([...m[1].matchAll(/'(sha256-[^']+)'/g)].map((h) => h[1]));
 }
 
 export function checkPage(html: string, page: string): CspFinding[] {
@@ -54,8 +59,10 @@ export function checkPage(html: string, page: string): CspFinding[] {
       findings.push({ page, kind: 'uncovered-style', detail: body.slice(0, 70) });
   }
 
-  for (const m of html.matchAll(/\sstyle="([^"]*)"/g)) {
-    findings.push({ page, kind: 'style-attribute', detail: m[1].slice(0, 70) });
+  // Both quote styles: a hash can never whitelist a style attribute, so any
+  // of them is a blocked bar or a blocked layout waiting to happen.
+  for (const m of html.matchAll(/\sstyle=("([^"]*)"|'([^']*)')/g)) {
+    findings.push({ page, kind: 'style-attribute', detail: (m[2] ?? m[3]).slice(0, 70) });
   }
 
   return findings;

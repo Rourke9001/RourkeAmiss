@@ -44,6 +44,22 @@ describe('checkPage', () => {
     ]);
   });
 
+  it('does not let a longer directive name shadow the one being read', () => {
+    const script = 'console.log(1)';
+    // script-src-elem comes first and carries the hash; script-src does not.
+    // A substring match would read the wrong pool and wrongly pass.
+    const html = page(
+      `script-src-elem 'self' '${sha(script)}'; script-src 'self'; style-src 'self'`,
+      `<script>${script}</script>`,
+    );
+    expect(checkPage(html, 'a.html').map((f) => f.kind)).toEqual(['uncovered-script']);
+  });
+
+  it('flags a single-quoted style attribute too', () => {
+    const html = page("script-src 'self'; style-src 'self' 'sha256-x'", "<div style='width: 50%'></div>");
+    expect(checkPage(html, 'a.html').map((f) => f.kind)).toEqual(['style-attribute']);
+  });
+
   it('does not confuse the style-src hashes with the script-src ones', () => {
     const script = 'console.log(1)';
     const html = page(`script-src 'self'; style-src 'self' '${sha(script)}'`, `<script>${script}</script>`);

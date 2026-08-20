@@ -21,6 +21,29 @@ jobs:
         with:
           submodules: false
 
+      # This workflow and ci.yml both trigger on push to main, independently.
+      # Without the guards here, a deploy can publish while verification fails —
+      # and branch protection, which would otherwise prevent that, is a repo
+      # setting the deploy cannot depend on. The two guards whose failures are
+      # invisible at runtime therefore run in the deploy path itself: one
+      # catches a never-publish leak, the other a CSP that would silently stop
+      # the form hydrating and the bars drawing. Oryx rebuilds the site inside
+      # the deploy action; this build is of the same commit.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Never-publish guard
+        run: npm run check:forbidden
+
+      - name: CSP coverage guard
+        run: npm run check:csp
+
       - name: Build and deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
