@@ -25,12 +25,21 @@ const delta = formatDelta(metric.from, metric.to);
 // Colour is never the only carrier of meaning: the arrow direction and the
 // sign already baked into `delta` both encode up-is-good vs down-is-good.
 const arrow = metric.direction === 'up-is-good' ? '↑' : '↓';
+// The fill width is carried by a class from a static scale, not by a style
+// attribute. A CSP that hashes inline styles cannot whitelist style attributes
+// at all — hashes do not apply to them, and CSP3 makes 'unsafe-inline' inert
+// once any hash is present — so an attribute here would have blanked every bar
+// in the trace strip. A class resolves against the component's own scoped
+// stylesheet, which Astro hashes automatically, and it still works with
+// JavaScript disabled. Quantised to 0.5%: at most ~2px on a real bar, while
+// the exact figures sit beside it in tabular numerals and are never rounded.
+const fillStep = Math.round(fillPercent * 2);
 ---
 
 <div class="metric" data-metric={metric.label} data-direction={metric.direction}>
   <div class="metric-label">{metric.label}</div>
   <div class="metric-track" data-metric-track>
-    <div class="metric-fill" data-metric-fill style={`width: ${fillPercent}%`}></div>
+    <div class={`metric-fill w-${fillStep}`} data-metric-fill></div>
   </div>
   {/* display:contents above the collapse point, so the four figures sit in the
       shared tracks rather than in a box of their own; a real flex box below it.
@@ -47,6 +56,210 @@ const arrow = metric.direction === 'up-is-good' ? '↑' : '↓';
 </div>
 
 <style>
+  /* Static width scale in 0.5% steps — see the note above the markup for why
+     the fill cannot use a style attribute. */
+  .w-0 { width: 0.0%; }
+  .w-1 { width: 0.5%; }
+  .w-2 { width: 1.0%; }
+  .w-3 { width: 1.5%; }
+  .w-4 { width: 2.0%; }
+  .w-5 { width: 2.5%; }
+  .w-6 { width: 3.0%; }
+  .w-7 { width: 3.5%; }
+  .w-8 { width: 4.0%; }
+  .w-9 { width: 4.5%; }
+  .w-10 { width: 5.0%; }
+  .w-11 { width: 5.5%; }
+  .w-12 { width: 6.0%; }
+  .w-13 { width: 6.5%; }
+  .w-14 { width: 7.0%; }
+  .w-15 { width: 7.5%; }
+  .w-16 { width: 8.0%; }
+  .w-17 { width: 8.5%; }
+  .w-18 { width: 9.0%; }
+  .w-19 { width: 9.5%; }
+  .w-20 { width: 10.0%; }
+  .w-21 { width: 10.5%; }
+  .w-22 { width: 11.0%; }
+  .w-23 { width: 11.5%; }
+  .w-24 { width: 12.0%; }
+  .w-25 { width: 12.5%; }
+  .w-26 { width: 13.0%; }
+  .w-27 { width: 13.5%; }
+  .w-28 { width: 14.0%; }
+  .w-29 { width: 14.5%; }
+  .w-30 { width: 15.0%; }
+  .w-31 { width: 15.5%; }
+  .w-32 { width: 16.0%; }
+  .w-33 { width: 16.5%; }
+  .w-34 { width: 17.0%; }
+  .w-35 { width: 17.5%; }
+  .w-36 { width: 18.0%; }
+  .w-37 { width: 18.5%; }
+  .w-38 { width: 19.0%; }
+  .w-39 { width: 19.5%; }
+  .w-40 { width: 20.0%; }
+  .w-41 { width: 20.5%; }
+  .w-42 { width: 21.0%; }
+  .w-43 { width: 21.5%; }
+  .w-44 { width: 22.0%; }
+  .w-45 { width: 22.5%; }
+  .w-46 { width: 23.0%; }
+  .w-47 { width: 23.5%; }
+  .w-48 { width: 24.0%; }
+  .w-49 { width: 24.5%; }
+  .w-50 { width: 25.0%; }
+  .w-51 { width: 25.5%; }
+  .w-52 { width: 26.0%; }
+  .w-53 { width: 26.5%; }
+  .w-54 { width: 27.0%; }
+  .w-55 { width: 27.5%; }
+  .w-56 { width: 28.0%; }
+  .w-57 { width: 28.5%; }
+  .w-58 { width: 29.0%; }
+  .w-59 { width: 29.5%; }
+  .w-60 { width: 30.0%; }
+  .w-61 { width: 30.5%; }
+  .w-62 { width: 31.0%; }
+  .w-63 { width: 31.5%; }
+  .w-64 { width: 32.0%; }
+  .w-65 { width: 32.5%; }
+  .w-66 { width: 33.0%; }
+  .w-67 { width: 33.5%; }
+  .w-68 { width: 34.0%; }
+  .w-69 { width: 34.5%; }
+  .w-70 { width: 35.0%; }
+  .w-71 { width: 35.5%; }
+  .w-72 { width: 36.0%; }
+  .w-73 { width: 36.5%; }
+  .w-74 { width: 37.0%; }
+  .w-75 { width: 37.5%; }
+  .w-76 { width: 38.0%; }
+  .w-77 { width: 38.5%; }
+  .w-78 { width: 39.0%; }
+  .w-79 { width: 39.5%; }
+  .w-80 { width: 40.0%; }
+  .w-81 { width: 40.5%; }
+  .w-82 { width: 41.0%; }
+  .w-83 { width: 41.5%; }
+  .w-84 { width: 42.0%; }
+  .w-85 { width: 42.5%; }
+  .w-86 { width: 43.0%; }
+  .w-87 { width: 43.5%; }
+  .w-88 { width: 44.0%; }
+  .w-89 { width: 44.5%; }
+  .w-90 { width: 45.0%; }
+  .w-91 { width: 45.5%; }
+  .w-92 { width: 46.0%; }
+  .w-93 { width: 46.5%; }
+  .w-94 { width: 47.0%; }
+  .w-95 { width: 47.5%; }
+  .w-96 { width: 48.0%; }
+  .w-97 { width: 48.5%; }
+  .w-98 { width: 49.0%; }
+  .w-99 { width: 49.5%; }
+  .w-100 { width: 50.0%; }
+  .w-101 { width: 50.5%; }
+  .w-102 { width: 51.0%; }
+  .w-103 { width: 51.5%; }
+  .w-104 { width: 52.0%; }
+  .w-105 { width: 52.5%; }
+  .w-106 { width: 53.0%; }
+  .w-107 { width: 53.5%; }
+  .w-108 { width: 54.0%; }
+  .w-109 { width: 54.5%; }
+  .w-110 { width: 55.0%; }
+  .w-111 { width: 55.5%; }
+  .w-112 { width: 56.0%; }
+  .w-113 { width: 56.5%; }
+  .w-114 { width: 57.0%; }
+  .w-115 { width: 57.5%; }
+  .w-116 { width: 58.0%; }
+  .w-117 { width: 58.5%; }
+  .w-118 { width: 59.0%; }
+  .w-119 { width: 59.5%; }
+  .w-120 { width: 60.0%; }
+  .w-121 { width: 60.5%; }
+  .w-122 { width: 61.0%; }
+  .w-123 { width: 61.5%; }
+  .w-124 { width: 62.0%; }
+  .w-125 { width: 62.5%; }
+  .w-126 { width: 63.0%; }
+  .w-127 { width: 63.5%; }
+  .w-128 { width: 64.0%; }
+  .w-129 { width: 64.5%; }
+  .w-130 { width: 65.0%; }
+  .w-131 { width: 65.5%; }
+  .w-132 { width: 66.0%; }
+  .w-133 { width: 66.5%; }
+  .w-134 { width: 67.0%; }
+  .w-135 { width: 67.5%; }
+  .w-136 { width: 68.0%; }
+  .w-137 { width: 68.5%; }
+  .w-138 { width: 69.0%; }
+  .w-139 { width: 69.5%; }
+  .w-140 { width: 70.0%; }
+  .w-141 { width: 70.5%; }
+  .w-142 { width: 71.0%; }
+  .w-143 { width: 71.5%; }
+  .w-144 { width: 72.0%; }
+  .w-145 { width: 72.5%; }
+  .w-146 { width: 73.0%; }
+  .w-147 { width: 73.5%; }
+  .w-148 { width: 74.0%; }
+  .w-149 { width: 74.5%; }
+  .w-150 { width: 75.0%; }
+  .w-151 { width: 75.5%; }
+  .w-152 { width: 76.0%; }
+  .w-153 { width: 76.5%; }
+  .w-154 { width: 77.0%; }
+  .w-155 { width: 77.5%; }
+  .w-156 { width: 78.0%; }
+  .w-157 { width: 78.5%; }
+  .w-158 { width: 79.0%; }
+  .w-159 { width: 79.5%; }
+  .w-160 { width: 80.0%; }
+  .w-161 { width: 80.5%; }
+  .w-162 { width: 81.0%; }
+  .w-163 { width: 81.5%; }
+  .w-164 { width: 82.0%; }
+  .w-165 { width: 82.5%; }
+  .w-166 { width: 83.0%; }
+  .w-167 { width: 83.5%; }
+  .w-168 { width: 84.0%; }
+  .w-169 { width: 84.5%; }
+  .w-170 { width: 85.0%; }
+  .w-171 { width: 85.5%; }
+  .w-172 { width: 86.0%; }
+  .w-173 { width: 86.5%; }
+  .w-174 { width: 87.0%; }
+  .w-175 { width: 87.5%; }
+  .w-176 { width: 88.0%; }
+  .w-177 { width: 88.5%; }
+  .w-178 { width: 89.0%; }
+  .w-179 { width: 89.5%; }
+  .w-180 { width: 90.0%; }
+  .w-181 { width: 90.5%; }
+  .w-182 { width: 91.0%; }
+  .w-183 { width: 91.5%; }
+  .w-184 { width: 92.0%; }
+  .w-185 { width: 92.5%; }
+  .w-186 { width: 93.0%; }
+  .w-187 { width: 93.5%; }
+  .w-188 { width: 94.0%; }
+  .w-189 { width: 94.5%; }
+  .w-190 { width: 95.0%; }
+  .w-191 { width: 95.5%; }
+  .w-192 { width: 96.0%; }
+  .w-193 { width: 96.5%; }
+  .w-194 { width: 97.0%; }
+  .w-195 { width: 97.5%; }
+  .w-196 { width: 98.0%; }
+  .w-197 { width: 98.5%; }
+  .w-198 { width: 99.0%; }
+  .w-199 { width: 99.5%; }
+  .w-200 { width: 100.0%; }
+
   .metric {
     display: grid;
     grid-column: 1 / -1;

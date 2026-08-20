@@ -49,6 +49,7 @@
 
   /* Interactive chrome never prints. */
   .provenance button,
+  .request,
   nav,
   footer {
     display: none;

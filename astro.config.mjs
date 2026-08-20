@@ -7,6 +7,25 @@ import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
+  // Astro emits three inline scripts — the client:visible bootstrap, the island
+  // hydration runtime, and the metric-bar animation — plus inline component
+  // styles. A `script-src 'self'` header blocks every one of them, which would
+  // have shipped a page whose form never hydrates and whose bars never draw.
+  // This generates a per-page <meta> CSP carrying the hash of each inline
+  // script and style, so the policy stays strict without 'unsafe-inline'.
+  security: {
+    csp: {
+      directives: [
+        "default-src 'self'",
+        "img-src 'self' data:",
+        "connect-src 'self'",
+        "form-action 'self'",
+        "base-uri 'self'",
+        "object-src 'none'",
+      ],
+      styleDirective: { resources: ["'self'", "'unsafe-inline'"] },
+    },
+  },
   integrations: [react(), mdx()],
   fonts: [
     {

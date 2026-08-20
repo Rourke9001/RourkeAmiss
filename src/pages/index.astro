@@ -2,12 +2,13 @@
 // The landing page. Evidence before prose, per spec §5 and
 // docs/design-direction.md: masthead, then the metrics ledger, then the
 // profile paragraph, then experience, projects, skills, and finally the
-// request-CV placeholder that Task 10 fills in.
+// request-CV section.
 import Base from '../layouts/Base.astro';
 import Masthead from '../components/Masthead.astro';
 import Metric from '../components/Metric.astro';
 import MetricList from '../components/MetricList.astro';
 import Entry from '../components/Entry.astro';
+import RequestSection from '../components/RequestSection.astro';
 import { cv } from '../content/cv/cv';
 ---
 <Base title={`${cv.name} — ${cv.positionLine}`} description={cv.profile} page="home">
@@ -67,9 +68,7 @@ import { cv } from '../content/cv/cv';
     </div>
   </section>
 
-  <section id="request" class="band">
-    <h2 class="gutter">Request CV</h2>
-  </section>
+  <RequestSection />
 
   <style>
     .metrics-heading {

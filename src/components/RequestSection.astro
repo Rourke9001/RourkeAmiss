@@ -1,0 +1,116 @@
+---
+// The request-CV section, mounted on both the landing page and /cv. It exists
+// as an Astro wrapper rather than being inlined twice because the island is
+// React: its markup is produced by the component, so the styles for that markup
+// need one owner rather than a copy per page — the same reasoning as MetricList.
+import { RequestCv } from './RequestCv.tsx';
+---
+
+<section id="request" class="band request">
+  <h2 class="gutter">Request CV</h2>
+  <div>
+    <RequestCv client:visible />
+  </div>
+</section>
+
+<style is:global>
+  .request .request-lede {
+    margin: 0 0 1.2rem;
+    max-width: 30rem;
+    color: var(--ink-2);
+  }
+
+  .request .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0.9rem;
+    max-width: 26rem;
+  }
+
+  .request label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+
+  .request .optional {
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink-3);
+  }
+
+  .request input,
+  .request textarea {
+    font-family: var(--sans);
+    font-size: 0.92rem;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    padding: 0.45rem 0.55rem;
+  }
+
+  .request input:focus-visible,
+  .request textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .request textarea {
+    resize: vertical;
+  }
+
+  .request button[type='submit'] {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 0;
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+  }
+
+  .request button[type='submit']:hover:not(:disabled) {
+    background: var(--accent-2);
+    border-color: var(--accent-2);
+  }
+
+  .request button[type='submit']:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+
+  /* Off-screen rather than display:none — a bot reading the DOM should see a
+     normal field, while sighted users, assistive technology and the tab order
+     never reach it. */
+  .request .honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .request .request-status:empty {
+    display: none;
+  }
+
+  .request .request-status {
+    margin: 0.8rem 0 0;
+    max-width: 30rem;
+    font-size: 0.88rem;
+    color: var(--alert);
+  }
+
+  .request .request-done {
+    margin: 0;
+    max-width: 30rem;
+    color: var(--ink-2);
+  }
+</style>

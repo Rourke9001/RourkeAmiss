@@ -14,6 +14,7 @@
 import Base from '../layouts/Base.astro';
 import Masthead from '../components/Masthead.astro';
 import Entry from '../components/Entry.astro';
+import RequestSection from '../components/RequestSection.astro';
 import { cv } from '../content/cv/cv';
 import '../styles/print.css';
 ---
@@ -76,6 +77,10 @@ import '../styles/print.css';
       ))}
     </ul>
   </section>
+
+  {/* Screen only — print.css hides .request, so the printed CV keeps ending at
+      Education & Certification. */}
+  <RequestSection />
 
   <style>
     /* The section marker keeps the landing page's vocabulary — mono, uppercase,

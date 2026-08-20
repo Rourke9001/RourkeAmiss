@@ -14,7 +14,8 @@
     "test:watch": "vitest",
     "check:forbidden": "node --experimental-strip-types scripts/check-forbidden.ts dist",
     "readme": "node --experimental-strip-types scripts/generate-readme.ts",
-    "readme:publish": "node --experimental-strip-types scripts/publish-readme.ts"
+    "readme:publish": "node --experimental-strip-types scripts/publish-readme.ts",
+    "check:csp": "node --experimental-strip-types scripts/check-csp.ts dist"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.7",
