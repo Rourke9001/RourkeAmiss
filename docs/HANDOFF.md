@@ -2,12 +2,13 @@
 
 ---
 
-Continue building my personal CV website. A previous session did the design work and got 6 of 15 tasks in; everything is on disk and in git. Read the files below before doing anything — do not re-derive decisions that are already recorded.
+Continue building my personal CV website. Tasks 1–7, 12 and 13 of 15 are done; everything is on disk, in git, and pushed. Read the files below before doing anything — do not re-derive decisions that are already recorded.
 
 **Project directory:** `C:\Users\Rourke Amiss\Documents\Personal\Projects\RourkeAmiss`
-**Repo:** github.com/Rourke9001/RourkeAmiss (public)
-**Branch:** `feat/site-foundation` — do the work here, `main` holds only the spec and plan
-**HEAD:** `2550c79`
+**Repo:** github.com/Rourke9001/RourkeAmiss (public) — branch `feat/site-foundation` is pushed
+**Profile repo:** github.com/Rourke9001/Rourke9001 (public) — holds the generated profile README
+**Branch:** `feat/site-foundation` — do the work here
+**HEAD:** `1aafe2d`
 
 ## Read these first, in this order
 
@@ -18,9 +19,7 @@ Continue building my personal CV website. A previous session did the design work
 
 ## How the work is being executed
 
-Using the `superpowers:subagent-driven-development` skill: one fresh implementer subagent per task, then a task reviewer, then a fix loop until the review is clean. Invoke that skill and resume the loop. The ledger records where each task stands.
-
-Task briefs are extracted with the skill's `scripts/task-brief PLAN_FILE N`, and review packages with `scripts/review-package PLAN_FILE BASE HEAD`. Do not paste whole plan files into subagent prompts.
+Using the `superpowers:subagent-driven-development` skill: one fresh implementer subagent per task, then a task reviewer, then a fix loop until the review is clean. Task briefs come from the skill's `scripts/task-brief PLAN_FILE N`. Do not paste whole plan files into subagent prompts.
 
 ## Where it stands
 
@@ -29,66 +28,62 @@ Task briefs are extracted with the skill's `scripts/task-brief PLAN_FILE N`, and
 | 1. Astro scaffold | Complete, review clean |
 | 2. Tokens, fonts, layout | Complete, review clean |
 | 3. CV content model | Complete, review clean |
-| 4. Delta arithmetic | Complete, review clean (1 fix round) |
+| 4. Delta arithmetic | Complete, review clean |
 | 5. Metric row + provenance island | Complete, review clean |
-| 6. Landing page | Implemented; review's three findings fixed in fix round 1. **Awaiting re-review.** |
-| 7–15 | Not started |
+| 6. Landing page | Complete, fix round 1 closed all three findings |
+| 7. `/cv` page + print stylesheet | Complete, verified against a real Chrome PDF at A4 |
+| 8. Case study collection | Not started |
+| 9. Request-CV API | Not started |
+| 10. Request form | Not started |
+| 11. SWA config + CSP | Not started |
+| 12. Never-publish build guard | Complete — **not reviewed by a task reviewer** |
+| 13. Profile README generator | Complete — **not reviewed by a task reviewer** |
+| 14. CI, axe, Playwright | Not started |
+| 15. Azure deployment | Not started — needs the user, portal and CLI on his subscription |
 
-Stack as actually installed: Astro 7.2.3, React 19.2.8, `@astrojs/react` 6.0.3, Vitest. 22 tests pass. `npm run build` succeeds.
+Tasks 12 and 13 were done out of plan order, to make the first public push safe and to get the profile README live. They were implemented test-first but did **not** go through the reviewer subagent the other tasks did. A reviewer pass on both is the cheapest outstanding work.
 
-## START HERE — re-review Task 6
+Stack as installed: Astro 7.2.3, React 19.2.8, `@astrojs/react` 6.0.3, Vitest. 35 tests pass. `npm run build` succeeds. `npm run check:forbidden` is clean.
 
-Fix round 1 closed all three findings (commit `2550c79`); the ledger records what
-changed and why. Nothing is open. The next step is the re-review of Task 6, then
-Task 7.
+## START HERE
 
-What the fixes touched, so the re-reviewer knows where to look:
+Task 8, the case study collection, is next in plan order. Before that, consider a reviewer pass on Tasks 12 and 13.
 
-- **New `src/components/MetricList.astro`** owns the trace strip's column tracks;
-  each `Metric` row is now `grid-template-columns: subgrid`. Six tracks — label,
-  bar, from, arrow, to, delta — so every figure holds its own column. Task 7's
-  `/cv` page must wrap its metrics in `<MetricList>`, not a bare div.
-- **`Metric.astro`** — the method toggle is unlined at rest and floated into the
-  note's right margin, dropping beneath the note below 30rem. Button text and
-  `aria-*` contract untouched; `tests/unit/provenance.test.tsx` still passes.
-- **`Masthead.astro`** — the contact row is two deliberate rows, with separators
-  generated on the item that follows them.
+## Incident this session — history was rewritten again
 
-**Look at the rendered page yourself.** All three findings came from screenshots,
-not diffs, and the unit suite cannot catch a geometric regression. The Chrome
-extension may not be connected; headless Chrome works directly:
+A real Jira ticket key from the employer's tracker had been written into the plan document by an earlier session as a test fixture for the never-publish guard, and was pushed publicly in commit `e09a4d1` on 18 Aug. The user identified it. It was genericised to `ABCD-1234` — the key itself is deliberately not repeated here — `git filter-branch` scrubbed it from every commit on both branches, and both were force-pushed.
 
-```
-npx astro dev --background
-"/c/Program Files/Google/Chrome/Application/chrome.exe" --headless=new --disable-gpu   --hide-scrollbars --virtual-time-budget=4000 --window-size=1280,1400   --screenshot=out.png "http://localhost:4321/"
-```
+**All commit SHAs recorded in the ledger above the Task 12 entry are pre-rewrite and no longer exist.** The old commit `e09a4d1` remains fetchable from GitHub's API by full SHA — unreachable objects survive until GitHub garbage-collects, and only a Support request forces it. Judged not worth a request for a Jira key; the user can revisit.
 
-Headless clamps the viewport to a 500px minimum, so narrow widths must be checked
-by loading the page in a fixed-width iframe from a temporary file in `public/`.
+This is the second leak of this shape, after the phone number. Both reached the public repo through the **plan document's test fixtures**, not through site content. When writing a guard, the fixture must not be a real instance of the thing being guarded.
 
 ## Hard constraints — these are not style preferences
 
-- **Azure Static Web Apps stays on the Free plan.** Free has `Unavailable` overage bandwidth, which is what makes a surprise bill structurally impossible. The user has MPN credits but explicitly does not want shock bills.
-- **`apiRuntime` is `node:22`.** Verified supported, no end-of-support date.
-- **No CV file in the repo, ever.** `.gitignore` blocks `*.pdf`, `*.docx`, `*.doc`. Never add an exception. The site has no CV download — a request form emails the user instead, and he replies manually with a tailored copy.
-- **No phone number anywhere**, in content, code, tests, or commit messages. Guards match the South African mobile *shape*, never a literal number. A previous session leaked the real number into the plan document and pushed it publicly; history was rewritten and force-pushed to fix it. Do not reintroduce it.
+- **Azure Static Web Apps stays on the Free plan.** Free has `Unavailable` overage bandwidth, which is what makes a surprise bill structurally impossible.
+- **`apiRuntime` is `node:22`.**
+- **No CV file in the repo, ever.** `.gitignore` blocks `*.pdf`, `*.docx`, `*.doc`. Never add an exception. The site has no CV download — a request form emails the user instead.
+- **No phone number anywhere**, in content, code, tests, or commit messages. Guards match the South African mobile *shape*, never a literal number.
 - **Never publish:** ticket identifiers, employer file paths, employer store/module/repo names, customer or network or substation identifiers. Case studies carry method and outcome only.
-- **The word "Senior" appears nowhere.** The user targets mid-level roles and gets filtered out of senior requisitions.
+- **The word "Senior" appears nowhere.** The user targets mid-level roles.
 - **Motion budget for the whole site:** metric bars draw once on scroll-in. Nothing else animates.
 
 ## Decisions already made — do not relitigate
 
-- Content model: one typed `src/content/cv/cv.ts` feeds the site, the generated GitHub profile README, and JSON-LD. Never hardcode CV text into a page.
+- Content model: one typed `src/content/cv/cv.ts` feeds the site, the generated profile README, and JSON-LD. Never hardcode CV text into a page.
 - Fonts: Astro's built-in Fonts API with the Fontsource provider. Never a Google Fonts `<link>` — the CSP blocks it.
-- Email transport: Azure Communication Services on an Azure Managed Domain (free subdomain, no DNS work needed). Resend is the documented fallback.
-- The method apparatus uses a dagger marker, not lettered sigla — see the amendment note in `docs/design-direction.md` for why.
-- `main` is protected in intent; CI becomes a required status check in Task 15.
+- Email transport: Azure Communication Services on an Azure Managed Domain. Resend is the documented fallback.
+- The method apparatus uses a dagger marker, not lettered sigla.
+- The metric column tracks live in `MetricList.astro`. Any page rendering metrics wraps them in `<MetricList>`, never a bare div.
+- The two figures the artifact CV dropped (type instantiations −76%, 117 Storybook nodes) are restored in `cv.ts`. Type instantiations are deliberately **not** a fifth headline metric — same intervention as the cold type-check, measured twice.
+- The profile README publishes on demand via `npm run readme:publish`, not from CI. A GitHub Action would need a write-scoped PAT in a public repo and would publish personal content with no human look at the diff.
 
-## Two things to raise with the user
+## Open items for the user
 
-1. **His two CV sources disagree.** The Google Doc includes "type instantiations from 4.18M to 1.02M (−76%)" and "117 Storybook nodes"; the artifact omits both. The site follows the artifact. Ask whether he wants those two figures added — they are strong, and it is his call which version he will defend in an interview.
-2. **Nothing since the spec and plan has been pushed.** The whole feature branch is local. Ask before pushing.
+1. **`SITE_LIVE` in `scripts/generate-readme.ts` is `false`.** rourkeamiss.co.za does not resolve yet, so the README names the site in plain text rather than linking it. **Task 15 is not finished until that flag flips and `npm run readme:publish` runs.**
+2. **Contrast.** `--ink-3` (#78828D) on `--paper` (#FBFBF9) is ~3.7:1, below the 4.5:1 axe applies to text under 24px. It is project-wide — metric labels, method notes, gutter markers, dates. Task 14's axe run will flag every instance. It is a token decision the user should make then.
+3. **`/cv` is not linked from anywhere.** The landing page has no route to it. Whether the CV page is discoverable or a URL handed out deliberately is a content decision.
+4. **The Google Doc CVs have broken header lines** — unfilled `[[ CITY — REPLACE THIS ]]` and `[[ LINKEDIN URL — REPLACE THIS ]]` placeholders in two of them, a stray bracket in a third. These are the documents he sends to employers. Not site work; raised and not actioned.
 
 ## Then continue
 
-After Task 6's fix loop closes, carry on through Tasks 7–15 in order: the print-tuned `/cv` page, the case study collection, the request-CV Azure Function, the request form, the Static Web Apps config with CSP, the never-publish build guard, the profile README generator, CI with axe and Playwright, and the Azure deployment. Task 15 needs the user — it is portal and CLI work on his subscription.
+Tasks 8 → 9 → 10 → 11 → 14 → 15. Task 11 needs 9 and 10; Task 14 needs 12, which is done; Task 15 is user-run and last.
