@@ -106,8 +106,11 @@ deployment token) and add it to the repository as the secret
 gh secret set AZURE_STATIC_WEB_APPS_API_TOKEN --repo Rourke9001/RourkeAmiss
 ```
 
-`.github/workflows/azure-static-web-apps.yml` is already committed and is scoped
-to `main`, so it stays dormant until the branch is merged.
+`.github/workflows/azure-static-web-apps.yml` is already committed. It is not
+dormant before the secret exists: it also triggers on pull requests targeting
+`main`, where the deploy step fails with `deployment_token was not provided`
+once the build and both guards have passed. That red X is expected until this
+step is done. `verify` in `ci.yml` is the check that carries the signal.
 
 ## 6. Deploy
 

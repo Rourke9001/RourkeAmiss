@@ -1,9 +1,13 @@
 name: Deploy
 
 # Requires the repository secret AZURE_STATIC_WEB_APPS_API_TOKEN, which does not
-# exist until the Static Web App is created. Until then this workflow has
-# nothing to run against — it is scoped to main, so it stays dormant while work
-# happens on a feature branch.
+# exist until the Static Web App is created.
+#
+# This is NOT dormant before then. The pull_request trigger fires on any PR
+# targeting main, and the deploy step fails with "deployment_token was not
+# provided" — after the build and both guards have run and passed. Until the
+# secret exists, expect that red X on every PR and read the guard steps above
+# it for the signal. `verify` in ci.yml is the check that means anything.
 on:
   push:
     branches: [main]
