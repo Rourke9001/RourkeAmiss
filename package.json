@@ -12,7 +12,8 @@
     "astro": "astro",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check:forbidden": "node --experimental-strip-types scripts/check-forbidden.ts dist"
+    "check:forbidden": "node --experimental-strip-types scripts/check-forbidden.ts dist",
+    "readme": "node --experimental-strip-types scripts/generate-readme.ts"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.3",
