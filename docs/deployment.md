@@ -123,6 +123,23 @@ Then check the things that could not be verified locally:
 
 - **The form, end to end.** Submit it and confirm the email lands in the inbox
   and that replying addresses the requester rather than `donotreply@`.
+
+- **The rate-limit key is per-caller, and is not everybody.** `clientKey` in
+  `api/src/rateLimit.ts` prefers `x-azure-clientip` and otherwise takes the
+  last `x-forwarded-for` hop with the port stripped. Which hop is correct
+  depends on how many proxies append in front of the Function, and that cannot
+  be established anywhere but a real deployment. Both ways of being wrong are
+  quiet:
+  - If the key still varies per request, the limit never fires. Submit six
+    times in an hour; the sixth must answer 429.
+  - If the key is a fixed internal Azure address, *every* visitor shares one
+    bucket and five submissions lock the site's only contact path for an hour.
+    Check from a second network — a phone off wifi is enough — that it is not
+    already limited.
+
+  Log the resolved key once while checking, then remove the log. If neither
+  header yields an address the code falls back to a single shared bucket, which
+  is the second failure above.
 - **`GET /api/request-cv` should answer 405.** Locally the emulator proxies to
   the Functions host, which answers 404 for an unregistered method before the
   route rule is consulted, so the rule in `staticwebapp.config.json` is

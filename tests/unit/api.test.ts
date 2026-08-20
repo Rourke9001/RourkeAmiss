@@ -109,8 +109,51 @@ describe('clientKey', () => {
     expect(a).toBe(b);
   });
 
+  // App Service writes the hop as ip:port. The port changes per connection, so
+  // keeping it would put every request in its own bucket and never rate-limit.
+  it('strips the port App Service appends, so one caller keeps one bucket', () => {
+    const first = clientKey(headers({ 'x-forwarded-for': '41.13.5.2:53311' }));
+    const second = clientKey(headers({ 'x-forwarded-for': '41.13.5.2:61004' }));
+    expect(first).toBe('41.13.5.2');
+    expect(first).toBe(second);
+  });
+
+  it('strips the port from x-azure-clientip too', () => {
+    expect(clientKey(headers({ 'x-azure-clientip': '41.13.5.2:443' }))).toBe('41.13.5.2');
+  });
+
+  it('does not truncate an IPv6 address to its first group', () => {
+    expect(clientKey(headers({ 'x-forwarded-for': '2001:db8::1' }))).toBe('2001:db8::1');
+    expect(clientKey(headers({ 'x-forwarded-for': '[2001:db8::1]:53311' }))).toBe('2001:db8::1');
+  });
+
+  it('keeps two different IPv6 callers in different buckets', () => {
+    const a = clientKey(headers({ 'x-forwarded-for': '[2001:db8::1]:1' }));
+    const b = clientKey(headers({ 'x-forwarded-for': '[2001:db8::2]:1' }));
+    expect(a).not.toBe(b);
+  });
+
+  it('ignores a header that is not an address rather than keying on it', () => {
+    expect(clientKey(headers({ 'x-azure-clientip': 'not-an-ip' }))).toBe('unknown');
+    expect(clientKey(headers({ 'x-forwarded-for': 'garbage, 999.999.999.999' }))).toBe('unknown');
+  });
+
   it('falls back to a single shared bucket when no header identifies the caller', () => {
     expect(clientKey(headers({}))).toBe('unknown');
     expect(clientKey(headers({ 'x-forwarded-for': '  ,  ' }))).toBe('unknown');
+  });
+});
+
+describe('createRateLimiter eviction', () => {
+  it('does not retain buckets after their window has passed', () => {
+    let t = 0;
+    const l = createRateLimiter({ max: 1, windowMs: 1000, now: () => t });
+    for (let i = 0; i < 50; i++) {
+      t = i * 2000;
+      l.check(`10.0.0.${i}`);
+    }
+    // The 50th caller is still limited on its own key, proving the sweep
+    // dropped stale buckets rather than everything.
+    expect(l.check('10.0.0.49')).toBe(false);
   });
 });

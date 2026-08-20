@@ -1,6 +1,20 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { pathToFileURL } from 'node:url';
+
+/**
+ * True only when this file is the entry point. Compares module URLs rather
+ * than matching the filename: an `endsWith('check-forbidden.ts')` test silently
+ * stops matching if the file is renamed or precompiled to .js, and the block
+ * it guards is the one that fails the deploy — so that miss turns the gate
+ * green while scanning nothing, which is the failure it exists to prevent.
+ */
+function isDirectInvocation(): boolean {
+  const entry = process.argv[1];
+  return entry !== undefined && import.meta.url === pathToFileURL(entry).href;
+}
+
 export const FORBIDDEN = [
   { name: 'ticket identifier', pattern: /\b[A-Z]{2,10}-\d{3,6}\b/g },
   { name: 'phone number', pattern: /(?:\+?27|0)[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{4}\b/g },
@@ -33,7 +47,7 @@ function walk(dir: string): string[] {
 // the deploy, so a wrong path or an unbuilt dist must fail rather than report
 // clean over nothing. A bare `if (roots.length)` cannot tell "run with no
 // argument" from "imported by a test", and silently passed both.
-if (process.argv[1]?.endsWith('check-forbidden.ts')) {
+if (isDirectInvocation()) {
   const roots = process.argv.slice(2);
   if (roots.length === 0) {
     console.error('check-forbidden: no path given. Usage: check-forbidden.ts <dir|file>...');

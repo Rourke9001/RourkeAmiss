@@ -143,7 +143,7 @@ api/                   Azure Function for the request-CV form (own package)
 scripts/               build guards and the profile-README generator
 tests/unit/            vitest
 tests/e2e/             playwright, including axe accessibility checks
-docs/                  design direction, deployment runbook, handoff
+docs/                  design direction and the deployment runbook
 ```
 
 Only case studies with `draft: false` are routed. Two of the three are currently

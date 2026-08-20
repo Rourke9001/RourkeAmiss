@@ -17,6 +17,20 @@ import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { pathToFileURL } from 'node:url';
+
+/**
+ * True only when this file is the entry point. Compares module URLs rather
+ * than matching the filename: an `endsWith('check-csp.ts')` test silently
+ * stops matching if the file is renamed or precompiled to .js, and the block
+ * it guards is the one that fails the deploy — so that miss turns the gate
+ * green while scanning nothing, which is the failure it exists to prevent.
+ */
+function isDirectInvocation(): boolean {
+  const entry = process.argv[1];
+  return entry !== undefined && import.meta.url === pathToFileURL(entry).href;
+}
+
 export interface CspFinding {
   page: string;
   kind:
@@ -101,7 +115,7 @@ function walk(dir: string): string[] {
 // Guarded on direct invocation, not merely on an argument being present: the
 // missing-argument case must FAIL rather than no-op, and a bare `if (argv[2])`
 // cannot tell "run with no argument" from "imported by a test".
-if (process.argv[1]?.endsWith('check-csp.ts')) {
+if (isDirectInvocation()) {
   const root = process.argv[2];
   if (!root) {
     console.error('check-csp: no directory given. Usage: check-csp.ts <dir>');
