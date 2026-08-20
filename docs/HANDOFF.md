@@ -80,7 +80,7 @@ This is the second leak of this shape, after the phone number. Both reached the 
 ## Open items for the user
 
 1. **`SITE_LIVE` in `scripts/generate-readme.ts` is `false`.** rourkeamiss.co.za does not resolve yet, so the README names the site in plain text rather than linking it. **Task 15 is not finished until that flag flips and `npm run readme:publish` runs.**
-2. **Contrast.** `--ink-3` (#78828D) on `--paper` (#FBFBF9) is ~3.7:1, below the 4.5:1 axe applies to text under 24px. It is project-wide — metric labels, method notes, gutter markers, dates. Task 14's axe run will flag every instance. It is a token decision the user should make then.
+2. **Contrast — RESOLVED, but it changed a colour you chose.** Light `--ink-3` was `#78828D`, which is 3.77:1 on `--paper` and fails the 4.5:1 axe applies to text under 24px. It is now `#646D78` (5.07:1), the same colour shifted −20 per channel so hue and coolness are unchanged. The dark value already passed at 4.96:1 and is untouched. Spec §5 and the plan's token block are amended to match. Revert in one line if you dislike it.
 3. **`/cv` is not linked from anywhere.** The landing page has no route to it. Whether the CV page is discoverable or a URL handed out deliberately is a content decision.
 4. **The Google Doc CVs have broken header lines** — unfilled `[[ CITY — REPLACE THIS ]]` and `[[ LINKEDIN URL — REPLACE THIS ]]` placeholders in two of them, a stray bracket in a third. These are the documents he sends to employers. Not site work; raised and not actioned.
 

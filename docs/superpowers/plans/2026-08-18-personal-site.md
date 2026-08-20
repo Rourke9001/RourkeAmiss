@@ -166,7 +166,7 @@ Create `src/styles/tokens.css`. Light is the base; dark is redefined twice so th
   --paper: #FBFBF9;
   --ink: #14171C;
   --ink-2: #3F4750;
-  --ink-3: #78828D;
+  --ink-3: #646D78; /* amended: #78828D failed 4.5:1 on --paper */
   --rule: #DFE3E6;
   --rule-soft: #EDF0F2;
   --accent: #1C4E5C;

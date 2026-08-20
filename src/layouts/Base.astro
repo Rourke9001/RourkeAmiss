@@ -47,7 +47,43 @@ const personSchema = {
   </head>
   <body>
     <div class="sheet">
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/" aria-current={page === 'home' ? 'page' : undefined}>Home</a>
+        <a href="/work/" aria-current={page === 'work' ? 'page' : undefined}>Work</a>
+        <a href="/cv/" aria-current={page === 'cv' ? 'page' : undefined}>CV</a>
+      </nav>
       <slot />
     </div>
+
+    <style>
+      /* The `page` prop existed from Task 2 for exactly this and went unused
+         until /work landed. Both /cv and /work are routes in the spec's route
+         table, so both are reachable; print.css hides nav entirely. */
+      .site-nav {
+        display: flex;
+        gap: 1.1rem;
+        margin-bottom: 2rem;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .site-nav a {
+        color: var(--ink-2);
+        text-decoration: none;
+        padding-bottom: 0.15rem;
+        border-bottom: 1px solid transparent;
+      }
+
+      .site-nav a:hover {
+        border-bottom-color: var(--rule);
+      }
+
+      .site-nav a[aria-current='page'] {
+        color: var(--ink);
+        border-bottom-color: var(--accent);
+      }
+    </style>
   </body>
 </html>

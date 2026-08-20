@@ -1,0 +1,125 @@
+---
+// A single case study. The metrics in frontmatter render through the same
+// MetricList/Metric pair as the landing page, so a figure quoted in a study
+// carries the same column alignment and the same method note as the ledger —
+// there is one way to present a measurement on this site, not two.
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Metric from '../../components/Metric.astro';
+import MetricList from '../../components/MetricList.astro';
+
+export async function getStaticPaths() {
+  const studies = await getCollection('work', ({ data }) => !data.draft);
+  return studies.map((study) => ({ params: { slug: study.id }, props: { study } }));
+}
+
+const { study } = Astro.props;
+const { Content } = await render(study);
+---
+<Base title={`${study.data.title} — Rourke Amiss`} description={study.data.summary} page="work">
+  <nav class="back">
+    <a href="/work/">← All work</a>
+  </nav>
+
+  <header class="head">
+    <p class="period">{study.data.period}</p>
+    <h1>{study.data.title}</h1>
+    <p class="summary">{study.data.summary}</p>
+    <p class="stack">{study.data.stack.join(' · ')}</p>
+  </header>
+
+  {study.data.metrics.length > 0 && (
+    <section class="metrics" aria-labelledby="study-metrics">
+      <h2 id="study-metrics" class="metrics-heading">Measured</h2>
+      <MetricList>
+        {study.data.metrics.map((metric) => <Metric metric={metric} />)}
+      </MetricList>
+    </section>
+  )}
+
+  <article class="prose">
+    <Content />
+  </article>
+
+  <style>
+    .back {
+      margin-bottom: 1.4rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+    }
+
+    .period {
+      margin: 0 0 0.3rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      color: var(--ink-2);
+    }
+
+    .head h1 {
+      margin: 0 0 0.5rem;
+      font-family: var(--serif);
+      font-size: 1.7rem;
+      line-height: 1.15;
+      max-width: 30rem;
+    }
+
+    .summary {
+      margin: 0 0 0.4rem;
+      max-width: 34rem;
+      color: var(--ink-2);
+    }
+
+    .stack {
+      margin: 0 0 2rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--ink-2);
+    }
+
+    .metrics {
+      margin-bottom: 2.4rem;
+    }
+
+    .metrics-heading {
+      margin: 0 0 0.6rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-2);
+      font-weight: 400;
+    }
+
+    .prose {
+      max-width: 34rem;
+    }
+
+    .prose :global(h2) {
+      margin: 2rem 0 0.5rem;
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      line-height: 1.25;
+    }
+
+    .prose :global(p) {
+      margin: 0 0 1rem;
+      color: var(--ink-2);
+    }
+
+    .prose :global(ul) {
+      margin: 0 0 1rem;
+      padding-left: 1.1rem;
+      color: var(--ink-2);
+    }
+
+    .prose :global(li) {
+      margin-bottom: 0.5rem;
+    }
+
+    .prose :global(strong) {
+      color: var(--ink);
+      font-weight: 600;
+    }
+  </style>
+</Base>

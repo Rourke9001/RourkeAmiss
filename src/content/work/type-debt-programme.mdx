@@ -1,0 +1,89 @@
+---
+title: Paying down 1,730 compiler errors without stopping delivery
+summary: An enterprise React application had 1,730 TypeScript errors and no map of them. Surveying the errors by root cause turned an unbounded backlog into three clusters and a publishable sequence.
+period: '2025'
+stack: ['TypeScript', 'React', 'Vitest', 'Chrome DevTools Protocol']
+draft: false
+order: 1
+metrics:
+  - label: Application type debt
+    from: 1730
+    to: 1066
+    unit: ''
+    delta: '−38%'
+    direction: down-is-good
+    verifiedBy: Full compiler error survey, re-audited three weeks after the remediation sequence completed.
+  - label: Analytics module errors
+    from: 264
+    to: 0
+    unit: ''
+    delta: '−100%'
+    direction: down-is-good
+    verifiedBy: Nine phases, each proven behaviour-preserving against 92 characterization snapshots.
+  - label: Tests across two modules
+    from: 57
+    to: 328
+    unit: ''
+    delta: '+475%'
+    direction: up-is-good
+    verifiedBy: Suite counts before the refactor and after both modules landed.
+---
+
+## The situation
+
+An enterprise React application, several years old, compiled with 1,730 TypeScript
+errors outstanding. The errors were suppressed rather than fixed, and nobody could
+say which of them mattered. A backlog with no shape cannot be sequenced, cannot be
+estimated, and cannot be argued for against feature work — so it never gets done.
+
+The first problem was not the errors. It was that there was no map.
+
+## What I measured first
+
+Before changing anything, I surveyed all 1,730 and grouped them by root cause rather
+than by file or by error code. Grouping by file tells you where the symptoms are;
+grouping by cause tells you what to fix.
+
+Three clusters accounted for 48% of the total. That single fact changed the shape of
+the work: roughly half the debt was three problems wearing 800 disguises, and the
+remaining half was a long tail that did not need to be scheduled at all.
+
+## The sequence
+
+I published the remediation order before touching any code — which clusters would be
+addressed, in what order, and what each was expected to return. Publishing it first
+does two things. It makes the plan reviewable by people who will not read the diff,
+and it makes the estimate falsifiable: if a cluster does not return what the survey
+predicted, the survey was wrong and that is worth knowing early.
+
+The sequence then ran across three modules, one at a time, each landing on its own.
+
+## How I proved it held
+
+A refactor that cannot be shown to preserve behaviour is a rewrite with better public
+relations. Four verification surfaces, used together:
+
+- **Characterization snapshots** — 92 of them, captured before the work started, with
+  every phase of the nine-phase module refactor checked against the set.
+- **Type-error set-diffing** — comparing the full error set before and after, so a fix
+  that silently traded one error class for another showed up as a diff rather than as
+  a smaller number.
+- **Browser verification over the Chrome DevTools Protocol** — driving the real
+  application and comparing computed output, which repeatedly caught defects that a
+  passing test suite did not.
+- **Test counts as a floor, not a target** — the two modules went from 57 tests to 328,
+  written as the characterization work exposed what was actually untested.
+
+The verification practice outlasted the programme. One of the things it surfaced had
+nothing to do with types: linting had never actually run in CI, because its glob
+matched 7 of 621 source files.
+
+## What it cost and what it returned
+
+The application went from 1,730 errors to 1,066 — a 38% reduction in its entire type
+debt. The module taken end to end went from 264 errors to zero. Test coverage across
+the two modules rose from 57 to 328.
+
+The number I care about most is the one that is hardest to show: the remaining 1,066
+errors are now a known quantity with a published order, rather than an undifferentiated
+mass. The next engineer to pick this up starts with the map.

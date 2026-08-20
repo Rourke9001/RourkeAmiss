@@ -136,7 +136,7 @@ The palette and type stack come from the CV artifact and are kept deliberately:
 | `--paper` | `#FBFBF9` | `#0E1114` |
 | `--ink` | `#14171C` | `#E8ECEF` |
 | `--ink-2` | `#3F4750` | `#AEB8C1` |
-| `--ink-3` | `#78828D` | `#78848F` |
+| `--ink-3` | `#646D78` | `#78848F` |
 | `--rule` | `#DFE3E6` | `#262D33` |
 | `--rule-soft` | `#EDF0F2` | `#1C2227` |
 | `--accent` | `#1C4E5C` | `#7FBECD` |

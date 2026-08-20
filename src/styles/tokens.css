@@ -2,7 +2,12 @@
   --paper: #FBFBF9;
   --ink: #14171C;
   --ink-2: #3F4750;
-  --ink-3: #78828D;
+  /* Darkened from the artifact's #78828D (3.77:1) to clear the 4.5:1 axe applies
+     to text under 24px — this token carries metric labels, method notes, gutter
+     markers and dates, all small. Shifted -20 per channel so hue and coolness are
+     unchanged; now 5.07:1. The dark value already passed at 4.96:1 and is left
+     alone, as print.css's own darker value already was. */
+  --ink-3: #646D78;
   --rule: #DFE3E6;
   --rule-soft: #EDF0F2;
   --accent: #1C4E5C;
