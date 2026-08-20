@@ -8,7 +8,7 @@ Continue building my personal CV website. Tasks 1–7, 12 and 13 of 15 are done;
 **Repo:** github.com/Rourke9001/RourkeAmiss (public) — branch `feat/site-foundation` is pushed
 **Profile repo:** github.com/Rourke9001/Rourke9001 (public) — holds the generated profile README
 **Branch:** `feat/site-foundation` — do the work here
-**HEAD:** `1aafe2d`
+**HEAD:** `c9a1d6b`
 
 ## Read these first, in this order
 
@@ -32,22 +32,22 @@ Using the `superpowers:subagent-driven-development` skill: one fresh implementer
 | 5. Metric row + provenance island | Complete, review clean |
 | 6. Landing page | Complete, fix round 1 closed all three findings |
 | 7. `/cv` page + print stylesheet | Complete, verified against a real Chrome PDF at A4 |
-| 8. Case study collection | Not started |
-| 9. Request-CV API | Not started |
-| 10. Request form | Not started |
-| 11. SWA config + CSP | Not started |
-| 12. Never-publish build guard | Complete — **not reviewed by a task reviewer** |
-| 13. Profile README generator | Complete — **not reviewed by a task reviewer** |
-| 14. CI, axe, Playwright | Not started |
-| 15. Azure deployment | Not started — needs the user, portal and CLI on his subscription |
+| 8. Case study collection | Complete |
+| 9. Request-CV API | Complete, verified against the real Function |
+| 10. Request form | Complete, verified against the real Function |
+| 11. SWA config + CSP | Complete, verified in the emulator |
+| 12. Never-publish build guard | Complete |
+| 13. Profile README generator | Complete |
+| 14. CI, axe, Playwright | Complete — 15 browser tests, axe clean on all five routes |
+| 15. Azure deployment | **Only the resources remain.** Workflow and runbook committed; follow `docs/deployment.md` |
 
-Tasks 12 and 13 were done out of plan order, to make the first public push safe and to get the profile README live. They were implemented test-first but did **not** go through the reviewer subagent the other tasks did. A reviewer pass on both is the cheapest outstanding work.
+Tasks 8–15 were implemented test-first but did **not** go through the reviewer subagent that Tasks 1–7 each got. A reviewer pass is the cheapest outstanding work, and the highest-value target is the CSP arrangement in Task 11 — the one piece whose failure mode is silent in every test and only visible in a real browser.
 
-Stack as installed: Astro 7.2.3, React 19.2.8, `@astrojs/react` 6.0.3, Vitest. 35 tests pass. `npm run build` succeeds. `npm run check:forbidden` is clean.
+Stack as installed: Astro 7.2.3, React 19.2.8, `@astrojs/react` 6.0.3, Vitest, Playwright. 64 unit tests and 15 browser tests pass. `npx astro check` reports 0 errors and 0 warnings. `npm run build`, `npm run check:forbidden` and `npm run check:csp` are all clean.
 
 ## START HERE
 
-Task 8, the case study collection, is next in plan order. Before that, consider a reviewer pass on Tasks 12 and 13.
+All the code is done. What remains is Task 15's resource creation on the user's Azure subscription — follow `docs/deployment.md` top to bottom. Nothing in the build depends on the domain, so the site can deploy before it is registered.
 
 ## Incident this session — history was rewritten again
 
@@ -79,9 +79,9 @@ This is the second leak of this shape, after the phone number. Both reached the 
 
 ## Open items for the user
 
-1. **`SITE_LIVE` in `scripts/generate-readme.ts` is `false`.** rourkeamiss.co.za does not resolve yet, so the README names the site in plain text rather than linking it. **Task 15 is not finished until that flag flips and `npm run readme:publish` runs.**
+1. **`SITE_LIVE` in `scripts/generate-readme.ts` is `false`.** rourkeamiss.co.za is not registered yet, so the profile README names the site in plain text rather than linking it — a dead link on a profile is worse than no link. **Registering the domain is not the end of the job: the deployment is not complete until that flag flips and `npm run readme:publish` runs.**
 2. **Contrast — RESOLVED, but it changed a colour you chose.** Light `--ink-3` was `#78828D`, which is 3.77:1 on `--paper` and fails the 4.5:1 axe applies to text under 24px. It is now `#646D78` (5.07:1), the same colour shifted −20 per channel so hue and coolness are unchanged. The dark value already passed at 4.96:1 and is untouched. Spec §5 and the plan's token block are amended to match. Revert in one line if you dislike it.
-3. **`/cv` is not linked from anywhere.** The landing page has no route to it. Whether the CV page is discoverable or a URL handed out deliberately is a content decision.
+3. **`/cv` and `/work` are now linked from a site nav** in `Base.astro`, because the spec's route table lists both as routes and Task 8's pages were otherwise unreachable. If the CV page was meant to be a URL handed out deliberately rather than a discoverable one, remove that one link — the decision is the user's.
 4. **The Google Doc CVs have broken header lines** — unfilled `[[ CITY — REPLACE THIS ]]` and `[[ LINKEDIN URL — REPLACE THIS ]]` placeholders in two of them, a stray bracket in a third. These are the documents he sends to employers. Not site work; raised and not actioned.
 
 ## Then continue
