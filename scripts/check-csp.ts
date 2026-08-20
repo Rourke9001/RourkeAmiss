@@ -62,7 +62,7 @@ export function checkPage(html: string, page: string): CspFinding[] {
 }
 
 function walk(dir: string): string[] {
-  return readdirSync(dir).flatMap((e) => {
+  return readdirSync(dir).flatMap((e: string) => {
     const p = join(dir, e);
     return statSync(p).isDirectory() ? walk(p) : [p];
   });

@@ -1,4 +1,5 @@
-import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
+import { app } from '@azure/functions';
+import type { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { handleRequest } from '../handler';
 import { createRateLimiter } from '../rateLimit';
 import { sendViaAcs } from '../email';

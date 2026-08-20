@@ -17,5 +17,11 @@ export default defineConfig({
       ),
     },
   },
-  test: { environment: 'jsdom', globals: true },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    // Playwright owns tests/e2e. Vitest's default include would otherwise pick
+    // up the .spec.ts files there and fail on the Playwright imports.
+    include: ['tests/unit/**/*.{test,spec}.{ts,tsx}'],
+  },
 });

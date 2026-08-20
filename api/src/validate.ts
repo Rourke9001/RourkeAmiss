@@ -2,7 +2,9 @@ import { z } from 'zod';
 
 export const requestSchema = z.object({
   name: z.string().trim().min(1).max(120),
-  email: z.string().trim().email().max(200),
+  // z.string().email() is deprecated in zod 4; z.email() is the current form,
+  // piped after trim so a pasted address with surrounding space still validates.
+  email: z.string().trim().pipe(z.email().max(200)),
   company: z.string().trim().max(200).optional().default(''),
   role: z.string().trim().max(200).optional().default(''),
   message: z.string().trim().max(5000).optional().default(''),

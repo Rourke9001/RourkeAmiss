@@ -22,7 +22,7 @@ export function scanText(text: string, source: string) {
 }
 
 function walk(dir: string): string[] {
-  return readdirSync(dir).flatMap((e) => {
+  return readdirSync(dir).flatMap((e: string) => {
     const p = join(dir, e);
     return statSync(p).isDirectory() ? walk(p) : [p];
   });
@@ -30,12 +30,12 @@ function walk(dir: string): string[] {
 
 const roots = process.argv.slice(2);
 if (roots.length > 0) {
-  const files = roots.flatMap((root) =>
+  const files = roots.flatMap((root: string) =>
     (statSync(root).isDirectory() ? walk(root) : [root]).filter((f) =>
       /\.(html|js|css|json|txt|xml|md)$/.test(f),
     ),
   );
-  const findings = files.flatMap((f) => scanText(readFileSync(f, 'utf8'), f));
+  const findings = files.flatMap((f: string) => scanText(readFileSync(f, 'utf8'), f));
   if (findings.length > 0) {
     console.error('Never-publish patterns found in published output:');
     for (const f of findings) console.error(`  ${f.source}: ${f.name} -> "${f.match}"`);

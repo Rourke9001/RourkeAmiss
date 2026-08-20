@@ -52,7 +52,9 @@ const personSchema = {
         <a href="/work/" aria-current={page === 'work' ? 'page' : undefined}>Work</a>
         <a href="/cv/" aria-current={page === 'cv' ? 'page' : undefined}>CV</a>
       </nav>
-      <slot />
+      <main id="content">
+        <slot />
+      </main>
     </div>
 
     <style>
