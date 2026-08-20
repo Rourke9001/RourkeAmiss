@@ -28,13 +28,31 @@ function walk(dir: string): string[] {
   });
 }
 
-const roots = process.argv.slice(2);
-if (roots.length > 0) {
+// Guarded on direct invocation rather than on an argument being present, and
+// refusing both empty cases, for the same reason as check-csp.ts: this gates
+// the deploy, so a wrong path or an unbuilt dist must fail rather than report
+// clean over nothing. A bare `if (roots.length)` cannot tell "run with no
+// argument" from "imported by a test", and silently passed both.
+if (process.argv[1]?.endsWith('check-forbidden.ts')) {
+  const roots = process.argv.slice(2);
+  if (roots.length === 0) {
+    console.error('check-forbidden: no path given. Usage: check-forbidden.ts <dir|file>...');
+    process.exit(1);
+  }
+
   const files = roots.flatMap((root: string) =>
     (statSync(root).isDirectory() ? walk(root) : [root]).filter((f) =>
       /\.(html|js|css|json|txt|xml|md)$/.test(f),
     ),
   );
+
+  if (files.length === 0) {
+    console.error(
+      `check-forbidden: no scannable files under ${roots.join(', ')} — refusing to report clean.`,
+    );
+    process.exit(1);
+  }
+
   const findings = files.flatMap((f: string) => scanText(readFileSync(f, 'utf8'), f));
   if (findings.length > 0) {
     console.error('Never-publish patterns found in published output:');

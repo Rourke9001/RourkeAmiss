@@ -1,7 +1,7 @@
 import { app } from '@azure/functions';
 import type { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { handleRequest } from '../handler';
-import { createRateLimiter } from '../rateLimit';
+import { createRateLimiter, clientKey } from '../rateLimit';
 import { sendViaAcs } from '../email';
 
 const limiter = createRateLimiter({ max: 5, windowMs: 60 * 60 * 1000 });
@@ -11,7 +11,7 @@ app.http('requestCv', {
   authLevel: 'anonymous',
   route: 'request-cv',
   handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
+    const ip = clientKey(request.headers);
     let body: unknown;
     try {
       body = await request.json();

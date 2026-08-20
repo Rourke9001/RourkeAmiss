@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { validateRequest } from '../../api/src/validate';
-import { createRateLimiter } from '../../api/src/rateLimit';
+import { createRateLimiter, clientKey } from '../../api/src/rateLimit';
 import { handleRequest, RECIPIENT } from '../../api/src/handler';
 
 const valid = { name: 'Jane Doe', email: 'jane@acme.com', company: 'Acme', role: 'Software Engineer', message: 'Please send your CV.', website: '' };
@@ -85,5 +85,32 @@ describe('handleRequest', () => {
     const res = await handleRequest({ body: valid, ip: '1.1.1.1', limiter: l, send });
     expect(res.status).toBe(429);
     expect(send).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('clientKey', () => {
+  const headers = (h: Record<string, string>) => ({
+    get: (name: string) => h[name.toLowerCase()] ?? null,
+  });
+
+  it('prefers x-azure-clientip, which a caller cannot set', () => {
+    expect(
+      clientKey(headers({ 'x-azure-clientip': '9.9.9.9', 'x-forwarded-for': '1.1.1.1' })),
+    ).toBe('9.9.9.9');
+  });
+
+  it('takes the last forwarded hop, not the caller-supplied first', () => {
+    expect(clientKey(headers({ 'x-forwarded-for': '1.1.1.1, 2.2.2.2, 3.3.3.3' }))).toBe('3.3.3.3');
+  });
+
+  it('gives a spoofed leading hop no effect on the bucket', () => {
+    const a = clientKey(headers({ 'x-forwarded-for': 'spoof-a, 3.3.3.3' }));
+    const b = clientKey(headers({ 'x-forwarded-for': 'spoof-b, 3.3.3.3' }));
+    expect(a).toBe(b);
+  });
+
+  it('falls back to a single shared bucket when no header identifies the caller', () => {
+    expect(clientKey(headers({}))).toBe('unknown');
+    expect(clientKey(headers({ 'x-forwarded-for': '  ,  ' }))).toBe('unknown');
   });
 });
