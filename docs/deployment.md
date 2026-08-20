@@ -125,6 +125,13 @@ Then check the things that could not be verified locally:
   the Functions host, which answers 404 for an unregistered method before the
   route rule is consulted, so the rule in `staticwebapp.config.json` is
   unverified. Both are refusals, so this is a tidiness check, not a security one.
+- **`POST /api/request-cv` must still work**, which is the thing to actually
+  watch. POST is deliberately absent from the 405 rule so it always reaches the
+  Functions host. The tempting tidier config — allow POST on the one route,
+  refuse every method on `/api/*` — depends on how Static Web Apps orders a rule
+  that matches but carries no action, and that could not be verified locally. If
+  it fell through, the form would 405 in production. POST to any other `/api`
+  path answers 404 from the Functions host, which registers exactly one route.
 
 ## 7. Protect main
 

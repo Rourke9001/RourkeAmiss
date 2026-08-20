@@ -7,7 +7,9 @@ import { cv } from '../content/cv/cv';
 interface Props {
   title: string;
   description: string;
-  page?: 'home' | 'cv' | 'work';
+  // 'none' exists so a page outside the nav — /404 — can decline to mark any
+  // link current. Without it the default claimed Home was the current page.
+  page?: 'home' | 'cv' | 'work' | 'none';
 }
 
 const { title, description, page = 'home' } = Astro.props;

@@ -19,8 +19,26 @@ import { join } from 'node:path';
 
 export interface CspFinding {
   page: string;
-  kind: 'missing-meta' | 'uncovered-script' | 'uncovered-style' | 'style-attribute';
+  kind:
+    | 'missing-meta'
+    | 'uncovered-script'
+    | 'uncovered-style'
+    | 'style-attribute'
+    | 'script-before-meta';
   detail: string;
+}
+
+/**
+ * Inline <style> blocks that Astro emits into <head> currently precede the meta
+ * it appends at the end of <head>, so they are outside the policy. That is
+ * Astro's ordering and not ours to change, and an injected style on a site with
+ * no user content is a far smaller thing than an injected script. The count is
+ * reported so a change is visible; scripts in that position are a hard failure.
+ */
+export function stylesBeforeMeta(html: string): number {
+  const meta = /<meta http-equiv="content-security-policy"/i.exec(html);
+  if (!meta) return 0;
+  return [...html.matchAll(/<style[^>]*>/gi)].filter((m) => m.index! < meta.index!).length;
 }
 
 const sha256 = (body: string) => `sha256-${createHash('sha256').update(body, 'utf8').digest('base64')}`;
@@ -48,6 +66,11 @@ export function checkPage(html: string, page: string): CspFinding[] {
   for (const m of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)) {
     const [, attrs, body] = m;
     if (/ld\+json/i.test(attrs) || body.trim() === '') continue;
+    // Order matters as much as coverage. A hash on a script the parser reached
+    // before the meta is worthless — the script has already run unpoliced —
+    // and a coverage-only check reports that page as clean.
+    if (m.index! < meta.index!)
+      findings.push({ page, kind: 'script-before-meta', detail: body.slice(0, 70) });
     if (!scriptHashes.has(sha256(body)))
       findings.push({ page, kind: 'uncovered-script', detail: body.slice(0, 70) });
   }
@@ -75,13 +98,35 @@ function walk(dir: string): string[] {
   });
 }
 
-if (process.argv[2]) {
-  const pages = walk(process.argv[2]).filter((f) => f.endsWith('.html'));
+// Guarded on direct invocation, not merely on an argument being present: the
+// missing-argument case must FAIL rather than no-op, and a bare `if (argv[2])`
+// cannot tell "run with no argument" from "imported by a test".
+if (process.argv[1]?.endsWith('check-csp.ts')) {
+  const root = process.argv[2];
+  if (!root) {
+    console.error('check-csp: no directory given. Usage: check-csp.ts <dir>');
+    process.exit(1);
+  }
+
+  const pages = walk(root).filter((f) => f.endsWith('.html'));
+  // Scanning nothing is not the same as finding nothing. This runs immediately
+  // before the deploy publishes, so a wrong path or an empty build must fail
+  // rather than report success over zero pages.
+  if (pages.length === 0) {
+    console.error(`check-csp: no HTML found under ${root} — refusing to report clean.`);
+    process.exit(1);
+  }
+
   const findings = pages.flatMap((f) => checkPage(readFileSync(f, 'utf8'), f));
   if (findings.length > 0) {
     console.error('CSP would block content in the built output:');
     for (const f of findings) console.error(`  ${f.page}: ${f.kind} -> ${f.detail}`);
     process.exit(1);
   }
-  console.log(`check-csp: clean (${pages.length} pages, every inline script and style hashed)`);
+
+  const early = pages.reduce((n, f) => n + stylesBeforeMeta(readFileSync(f, 'utf8')), 0);
+  console.log(
+    `check-csp: clean (${pages.length} pages, every inline script and style hashed, ` +
+      `no inline script precedes the meta; ${early} inline styles do)`,
+  );
 }

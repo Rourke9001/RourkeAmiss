@@ -478,11 +478,12 @@ const fillStep = Math.round(fillPercent * 2);
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fills = document.querySelectorAll<HTMLElement>('[data-metric-fill]');
 
-  if (!reduceMotion && fills.length) {
-    fills.forEach((fill) => {
-      fill.style.transform = 'scaleX(0)';
-    });
-
+  // 'IntersectionObserver' in window is checked because the bars are collapsed
+  // to zero width by this script and only restored by the observer. If the
+  // constructor is missing or throws AFTER the fills are blanked, the strip —
+  // the landing page's headline evidence — renders as four empty tracks with no
+  // path back. Nothing is blanked until the observer exists.
+  if (!reduceMotion && fills.length && 'IntersectionObserver' in window) {
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries.filter((entry) => entry.isIntersecting);
@@ -496,6 +497,10 @@ const fillStep = Math.round(fillPercent * 2);
       },
       { threshold: 0.4 },
     );
+
+    fills.forEach((fill) => {
+      fill.style.transform = 'scaleX(0)';
+    });
 
     document.querySelectorAll('[data-metric]').forEach((el) => observer.observe(el));
   }

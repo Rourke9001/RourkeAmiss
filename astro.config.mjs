@@ -23,7 +23,12 @@ export default defineConfig({
         "base-uri 'self'",
         "object-src 'none'",
       ],
-      styleDirective: { resources: ["'self'", "'unsafe-inline'"] },
+      // No 'unsafe-inline' here. CSP3 ignores it while any hash is present, so
+      // today it protects nothing — but if inline styles ever stop being
+      // emitted (build.inlineStylesheets: 'never' is one line away) no hashes
+      // are generated and it would silently become the active policy. The
+      // hashes are the mechanism; nothing else belongs in this directive.
+      styleDirective: { resources: ["'self'"] },
     },
   },
   integrations: [react(), mdx()],

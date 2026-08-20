@@ -30,8 +30,28 @@ test('the CV page carries no phone number', async ({ page }) => {
 
 test('the CV page prints without interactive chrome', async ({ page }) => {
   await page.goto('/cv');
+
+  // Assert the targets EXIST before asserting they are hidden. The version of
+  // this test that shipped selected '.provenance button', which /cv does not
+  // render at all — /cv carries no trace strip — and toBeHidden() passes for a
+  // locator that matches nothing, so it could never fail. The interactive
+  // chrome /cv actually has is the nav and the request form.
+  await expect(page.locator('nav.site-nav')).toHaveCount(1);
+  await expect(page.locator('#request')).toHaveCount(1);
+
   await page.emulateMedia({ media: 'print' });
-  await expect(page.locator('.provenance button').first()).toBeHidden();
+  await expect(page.locator('nav.site-nav')).toBeHidden();
+  await expect(page.locator('#request')).toBeHidden();
+});
+
+test('the provenance toggle is hidden in print, where it exists', async ({ page }) => {
+  await page.goto('/');
+  const toggles = page.locator('.provenance button');
+  await expect(toggles).toHaveCount(4);
+  // print.css ships on /cv only, so on / the buttons stay visible under print
+  // emulation. What matters here is that the toggle is a real element with a
+  // real count — the assertion the /cv test could not make.
+  await expect(toggles.first()).toBeVisible();
 });
 
 // The defect this guards reached review once and no unit test could have caught

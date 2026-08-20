@@ -47,11 +47,22 @@
     text-decoration: none;
   }
 
-  /* Interactive chrome never prints. */
+  /* Interactive chrome never prints.
+
+     !important is load-bearing here, not laziness. Astro scopes a component's
+     styles by appending a data attribute, so Base.astro's `.site-nav { display:
+     flex }` compiles to `.site-nav[data-astro-cid-...]` at specificity (0,2,0)
+     and beats a bare `nav` at (0,0,1) — the nav printed on the CV until this
+     was raised. The scope hash changes per build, so it cannot be matched
+     literally, and this is exactly the case !important exists for: a print
+     rule overriding a screen rule it cannot out-specify.
+
+     This is the second instance of the same trap in this stylesheet; the first
+     was the forced light tokens losing to the dark-theme selectors. */
   .provenance button,
   .request,
   nav,
   footer {
-    display: none;
+    display: none !important;
   }
 }

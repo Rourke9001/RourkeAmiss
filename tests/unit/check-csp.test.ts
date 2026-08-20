@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
-import { checkPage } from '../../scripts/check-csp';
+import { checkPage, stylesBeforeMeta } from '../../scripts/check-csp';
 
 const sha = (body: string) => `sha256-${createHash('sha256').update(body, 'utf8').digest('base64')}`;
 const page = (meta: string, body: string) =>
@@ -36,6 +36,26 @@ describe('checkPage', () => {
   it('ignores external scripts and stylesheets, which style-src self already covers', () => {
     const html = page("script-src 'self'; style-src 'self'", '<script src="/a.js"></script><link rel="stylesheet" href="/a.css">');
     expect(checkPage(html, 'a.html')).toEqual([]);
+  });
+
+  it('flags an inline script that the parser reaches before the meta', () => {
+    const script = 'console.log(1)';
+    // Hashed, but positioned ahead of the policy that carries the hash — so it
+    // has already run by the time the browser reads the meta. A coverage-only
+    // check calls this page clean, which is the hole this closes.
+    const html =
+      `<html><head><script>${script}</script>` +
+      `<meta http-equiv="content-security-policy" content="script-src 'self' '${sha(script)}'; style-src 'self'">` +
+      `</head><body></body></html>`;
+    expect(checkPage(html, 'a.html').map((f) => f.kind)).toEqual(['script-before-meta']);
+  });
+
+  it('counts inline styles that precede the meta without failing on them', () => {
+    const html =
+      `<html><head><style>.a{color:red}</style><style>.b{color:blue}</style>` +
+      `<meta http-equiv="content-security-policy" content="script-src 'self'; style-src 'self'">` +
+      `</head><body></body></html>`;
+    expect(stylesBeforeMeta(html)).toBe(2);
   });
 
   it('reports a page with no CSP at all', () => {

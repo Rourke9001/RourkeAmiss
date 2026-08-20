@@ -12,18 +12,14 @@
   },
   "routes": [
     {
-      "route": "/api/request-cv",
-      "methods": [
-        "POST"
-      ]
-    },
-    {
       "route": "/api/*",
       "methods": [
         "GET",
         "PUT",
         "PATCH",
-        "DELETE"
+        "DELETE",
+        "HEAD",
+        "OPTIONS"
       ],
       "statusCode": 405
     }
